@@ -2,13 +2,18 @@ import { NextResponse } from 'next/server'
 import { db } from '@/lib/db'
 import {
   INVALID,
+  isInt,
   isNonEmptyString,
+  isOneOf,
   jsonError,
   parseDateField,
   readJsonBody,
 } from '@/app/api/_lib/helpers'
 
 export const dynamic = 'force-dynamic'
+
+// انواع مجاز رویداد ویژه (باید با schema.prisma هم‌خوان باشد)
+const EVENT_TYPES = ['BIRTHDAY', 'ANNIVERSARY', 'APPOINTMENT', 'MEMORIAL', 'CUSTOM']
 
 // ─────────────────────────────────────────────
 //  GET /api/events?start=ISO&end=ISO — رویدادها (مرتب بر اساس تاریخ)
@@ -46,7 +51,7 @@ export async function GET(req: Request) {
 
 // ─────────────────────────────────────────────
 //  POST /api/events — ساخت رویداد جدید
-//  body: { title, date (ISO, required), time?, color?, note? }
+//  body: { title, date (ISO, required), time?, color?, note?, type?, yearly?, birthYear? }
 // ─────────────────────────────────────────────
 export async function POST(req: Request) {
   try {
@@ -64,6 +69,12 @@ export async function POST(req: Request) {
       return jsonError('color must be a string', 400)
     if (body.note !== undefined && body.note !== null && typeof body.note !== 'string')
       return jsonError('note must be a string or null', 400)
+    if (body.type !== undefined && !isOneOf(body.type, EVENT_TYPES))
+      return jsonError('type must be one of BIRTHDAY | ANNIVERSARY | APPOINTMENT | MEMORIAL | CUSTOM', 400)
+    if (body.yearly !== undefined && typeof body.yearly !== 'boolean')
+      return jsonError('yearly must be a boolean', 400)
+    if (body.birthYear !== undefined && body.birthYear !== null && !isInt(body.birthYear))
+      return jsonError('birthYear must be an integer or null', 400)
 
     const event = await db.event.create({
       data: {
@@ -72,6 +83,10 @@ export async function POST(req: Request) {
         time: typeof body.time === 'string' ? body.time : undefined,
         color: typeof body.color === 'string' ? body.color : undefined,
         note: typeof body.note === 'string' ? body.note : undefined,
+        // فیلدهای رویداد ویژه — مقادیر پیش‌فرض: CUSTOM / false / null
+        type: isOneOf(body.type, EVENT_TYPES) ? body.type : 'CUSTOM',
+        yearly: body.yearly === true,
+        birthYear: isInt(body.birthYear) ? body.birthYear : null,
       },
     })
     return NextResponse.json(event, { status: 201 })

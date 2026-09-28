@@ -81,7 +81,7 @@ model Note {
 }
 
 // ─────────────────────────────────────────────
-//  رویدادها (Events) - تقویم
+//  رویدادها (Events) - تقویم + رویدادهای ویژه (تولد، سالگرد و ...)
 // ─────────────────────────────────────────────
 model Event {
   id        String   @id @default(cuid())
@@ -90,5 +90,11 @@ model Event {
   time      String?
   color     String   @default("#8B5CF6")
   note      String?
+  // نوع رویداد ویژه: BIRTHDAY | ANNIVERSARY | APPOINTMENT | MEMORIAL | CUSTOM
+  type      String   @default("CUSTOM")
+  // تکرار سالانه بر اساس همان روزِ شمسی (مثل تولدها و سالگردها)
+  yearly    Boolean  @default(false)
+  // سال تولد شمسی (برای محاسبه سن، اختیاری)
+  birthYear Int?
   createdAt DateTime @default(now())
 }

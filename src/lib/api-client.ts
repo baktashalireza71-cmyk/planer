@@ -9,6 +9,7 @@ import type {
   Stats,
   Category,
   Priority,
+  EventType,
 } from "./constants";
 
 // ─────────────────────────────────────────────
@@ -148,6 +149,12 @@ export interface EventInput {
   time?: string | null;
   color?: string;
   note?: string | null;
+  /** نوع رویداد ویژه (پیش‌فرض CUSTOM) */
+  type?: EventType;
+  /** تکرار سالانه بر اساس همان روز شمسی */
+  yearly?: boolean;
+  /** سال تولد شمسی (فقط برای تولد) */
+  birthYear?: number | null;
 }
 
 export const eventsApi = {

@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Category, Priority } from "@/lib/constants";
+import type { Category, Priority, EventType } from "@/lib/constants";
 import { tasksApi, habitsApi, goalsApi, notesApi, eventsApi, statsApi } from "@/lib/api-client";
 
 const KEYS = {
@@ -161,7 +161,7 @@ export function useEventMutations() {
 
   const create = useMutation({ mutationFn: eventsApi.create, onSuccess: invalidate });
   const update = useMutation({
-    mutationFn: ({ id, ...body }: { id: string; title?: string; date?: string; time?: string | null; color?: string; note?: string | null }) =>
+    mutationFn: ({ id, ...body }: { id: string; title?: string; date?: string; time?: string | null; color?: string; note?: string | null; type?: EventType; yearly?: boolean; birthYear?: number | null }) =>
       eventsApi.update(id, body),
     onSuccess: invalidate,
   });

@@ -6,6 +6,7 @@ import {
   Home,
   ListTodo,
   CalendarDays,
+  CalendarHeart,
   Repeat,
   Target,
   StickyNote,
@@ -19,6 +20,7 @@ import { cn } from "@/lib/utils";
 import Dashboard from "./dashboard";
 import TasksSection from "./tasks-section";
 import CalendarSection from "./calendar-section";
+import EventsSection from "./events-section";
 import HabitsSection from "./habits-section";
 import GoalsSection from "./goals-section";
 import NotesSection from "./notes-section";
@@ -28,6 +30,7 @@ export type TabKey =
   | "dashboard"
   | "tasks"
   | "calendar"
+  | "events"
   | "habits"
   | "goals"
   | "notes"
@@ -36,15 +39,18 @@ export type TabKey =
 export const NAV_ITEMS: {
   key: TabKey;
   label: string;
+  /** برچسب کوتاه برای نویگیشن پایین موبایل */
+  shortLabel?: string;
   icon: typeof Home;
   color: string;
 }[] = [
   { key: "dashboard", label: "خانه", icon: Home, color: "#F97316" },
   { key: "tasks", label: "کارها", icon: ListTodo, color: "#14B8A6" },
   { key: "calendar", label: "تقویم", icon: CalendarDays, color: "#8B5CF6" },
-  { key: "habits", label: "عادت‌ها", icon: Repeat, color: "#EC4899" },
-  { key: "goals", label: "اهداف", icon: Target, color: "#10B981" },
-  { key: "notes", label: "یادداشت‌ها", icon: StickyNote, color: "#F59E0B" },
+  { key: "events", label: "رویدادها", shortLabel: "رویداد", icon: CalendarHeart, color: "#F43F5E" },
+  { key: "habits", label: "عادت‌ها", shortLabel: "عادت", icon: Repeat, color: "#EC4899" },
+  { key: "goals", label: "اهداف", shortLabel: "اهداف", icon: Target, color: "#10B981" },
+  { key: "notes", label: "یادداشت‌ها", shortLabel: "یادداشت", icon: StickyNote, color: "#F59E0B" },
   { key: "stats", label: "آمار", icon: BarChart3, color: "#E11D48" },
 ];
 
@@ -134,24 +140,24 @@ export default function AppShell() {
 
         {/* ─── محتوای اصلی ─── */}
         <main className="flex-1 min-w-0 px-4 sm:px-6 lg:px-8 pt-5 lg:pt-8 pb-28 lg:pb-10">
-          {/* هدر موبایل */}
-          <header className="lg:hidden flex items-center justify-between mb-5">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 text-white shadow-md shadow-orange-500/30">
+          {/* هدر موبایل — flex-wrap تا در باریک‌ترین صفحه‌ها هم چیزی بیرون نزند */}
+          <header className="lg:hidden flex flex-wrap items-center justify-between gap-x-2 gap-y-2 mb-5">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-orange-500 via-pink-500 to-purple-500 text-white shadow-md shadow-orange-500/30">
                 <CalendarCheck2 className="h-5 w-5" strokeWidth={2.2} />
               </div>
-              <div>
+              <div className="min-w-0">
                 <h1 className="text-base font-black text-gradient leading-tight">پلنر من</h1>
-                <p className="text-[10px] text-muted-foreground">
+                <p className="text-[10px] text-muted-foreground truncate">
                   {mounted ? formatJalaliFull(today) : "…"}
                 </p>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 shadow-sm">
-                {faNum(jd)} {JALALI_MONTHS[jm - 1]} {faNum(jy)}
+            <div className="flex items-center gap-1.5 shrink-0">
+              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-2.5 py-1.5 text-[11px] font-bold text-orange-600 shadow-sm">
+                {faNum(jd)} {JALALI_MONTHS[jm - 1]}
               </div>
-              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 shadow-sm flex items-center gap-1">
+              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-2.5 py-1.5 text-[11px] font-bold text-orange-600 shadow-sm flex items-center gap-1">
                 <Clock className="h-3.5 w-3.5" />
                 <span className="tabular-nums">{liveNow ? formatClockFa(liveNow) : "۰۰:۰۰"}</span>
               </div>
@@ -170,6 +176,7 @@ export default function AppShell() {
               {tab === "dashboard" && <Dashboard onNavigate={setTab} />}
               {tab === "tasks" && <TasksSection />}
               {tab === "calendar" && <CalendarSection />}
+              {tab === "events" && <EventsSection />}
               {tab === "habits" && <HabitsSection />}
               {tab === "goals" && <GoalsSection />}
               {tab === "notes" && <NotesSection />}
@@ -184,7 +191,8 @@ export default function AppShell() {
         aria-label="ناوبری پایین"
         className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t border-border/70 bg-white/85 backdrop-blur-xl pb-[env(safe-area-inset-bottom)]"
       >
-        <div className="no-scrollbar flex overflow-x-auto items-stretch justify-between px-1 py-1.5">
+        {/* ۸ آیتم همیشه کامل جا می‌شوند: flex-1 + min-w-0 + برچسب کوتاه */}
+        <div className="flex items-stretch justify-between px-0.5 py-1.5">
           {NAV_ITEMS.map((item) => {
             const active = tab === item.key;
             return (
@@ -192,7 +200,7 @@ export default function AppShell() {
                 key={item.key}
                 onClick={() => setTab(item.key)}
                 aria-current={active ? "page" : undefined}
-                className="relative flex min-w-[13.5%] flex-col items-center gap-0.5 rounded-xl px-1 py-1.5 cursor-pointer"
+                className="relative flex flex-1 min-w-0 flex-col items-center gap-0.5 rounded-xl px-0.5 py-1.5 cursor-pointer"
               >
                 {active && (
                   <motion.span
@@ -211,11 +219,11 @@ export default function AppShell() {
                 />
                 <span
                   className={cn(
-                    "relative text-[10px] font-bold",
+                    "relative w-full truncate text-center text-[9.5px] leading-tight font-bold",
                     active ? "text-orange-700" : "text-muted-foreground"
                   )}
                 >
-                  {item.label}
+                  {item.shortLabel ?? item.label}
                 </span>
               </button>
             );

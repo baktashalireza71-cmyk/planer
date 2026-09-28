@@ -17,6 +17,11 @@ import {
   PenLine,
   GlassWater,
   Sparkles,
+  Cake,
+  Heart,
+  CalendarClock,
+  Flower2,
+  Star,
 } from "lucide-react";
 
 // ─────────────────────────────────────────────
@@ -83,6 +88,9 @@ export interface Note {
   updatedAt: string;
 }
 
+/** انواع رویدادهای ویژه زندگی (تولد، سالگرد و ...) */
+export type EventType = "BIRTHDAY" | "ANNIVERSARY" | "APPOINTMENT" | "MEMORIAL" | "CUSTOM";
+
 export interface PlannerEvent {
   id: string;
   title: string;
@@ -90,6 +98,12 @@ export interface PlannerEvent {
   time?: string | null;
   color: string;
   note?: string | null;
+  /** نوع رویداد ویژه */
+  type: EventType;
+  /** تکرار سالانه بر اساس همان روز شمسی */
+  yearly: boolean;
+  /** سال تولد شمسی (برای محاسبه سن، اختیاری) */
+  birthYear?: number | null;
   createdAt: string;
 }
 
@@ -130,6 +144,22 @@ export const CATEGORIES: Record<
 
 export const CATEGORY_LIST: Category[] = ["WORK", "PERSONAL", "STUDY", "HEALTH", "OTHER"];
 export const PRIORITY_LIST: Priority[] = ["HIGH", "MEDIUM", "LOW"];
+
+// ─────────────────────────────────────────────────
+//  انواع رویدادهای ویژه — برچسب، آیکون و رنگ هر نوع
+// ─────────────────────────────────────────────────
+export const EVENT_TYPES: Record<
+  EventType,
+  { label: string; icon: LucideIcon; color: string; bg: string }
+> = {
+  BIRTHDAY: { label: "تولد", icon: Cake, color: "#EC4899", bg: "bg-pink-100" },
+  ANNIVERSARY: { label: "سالگرد", icon: Heart, color: "#F43F5E", bg: "bg-rose-100" },
+  APPOINTMENT: { label: "قرار ملاقات", icon: CalendarClock, color: "#14B8A6", bg: "bg-teal-100" },
+  MEMORIAL: { label: "یادبود", icon: Flower2, color: "#94A3B8", bg: "bg-slate-100" },
+  CUSTOM: { label: "شخصی", icon: Star, color: "#F97316", bg: "bg-orange-100" },
+};
+
+export const EVENT_TYPE_LIST: EventType[] = ["BIRTHDAY", "ANNIVERSARY", "APPOINTMENT", "MEMORIAL", "CUSTOM"];
 
 // ─────────────────────────────────────────────
 //  رنگ‌های شاد برای انتخاب کاربر

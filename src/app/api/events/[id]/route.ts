@@ -3,7 +3,9 @@ import { Prisma } from '@prisma/client'
 import { db } from '@/lib/db'
 import {
   INVALID,
+  isInt,
   isNonEmptyString,
+  isOneOf,
   jsonError,
   parseDateField,
   readJsonBody,
@@ -11,9 +13,12 @@ import {
 
 export const dynamic = 'force-dynamic'
 
+// انواع مجاز رویداد ویژه (باید با schema.prisma هم‌خوان باشد)
+const EVENT_TYPES = ['BIRTHDAY', 'ANNIVERSARY', 'APPOINTMENT', 'MEMORIAL', 'CUSTOM']
+
 // ─────────────────────────────────────────────
 //  PATCH /api/events/[id] — ویرایش رویداد
-//  body: { title?, date? (ISO), time?, color?, note? }
+//  body: { title?, date? (ISO), time?, color?, note?, type?, yearly?, birthYear? }
 // ─────────────────────────────────────────────
 export async function PATCH(req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -48,6 +53,21 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       if (body.note !== null && typeof body.note !== 'string')
         return jsonError('note must be a string or null', 400)
       data.note = body.note
+    }
+    // فیلدهای اختیاری رویداد ویژه
+    if (body.type !== undefined) {
+      if (!isOneOf(body.type, EVENT_TYPES))
+        return jsonError('type must be one of BIRTHDAY | ANNIVERSARY | APPOINTMENT | MEMORIAL | CUSTOM', 400)
+      data.type = body.type
+    }
+    if (body.yearly !== undefined) {
+      if (typeof body.yearly !== 'boolean') return jsonError('yearly must be a boolean', 400)
+      data.yearly = body.yearly
+    }
+    if (body.birthYear !== undefined) {
+      if (body.birthYear !== null && !isInt(body.birthYear))
+        return jsonError('birthYear must be an integer or null', 400)
+      data.birthYear = body.birthYear
     }
 
     const event = await db.event.update({ where: { id }, data })

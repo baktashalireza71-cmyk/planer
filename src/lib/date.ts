@@ -142,6 +142,43 @@ export function relativeDaysFa(target: Date, today: Date = new Date()): string {
   return `${faNum(-diff)} روز گذشته`;
 }
 
+/**
+ * تاریخ شمسیِ رخداد بعدی یک رویداد (برای رویدادهای سالانه بر اساس ماه/روز شمسی)
+ * — رویداد غیرسالانه: همان تاریخ ذخیره‌شده برمی‌گردد.
+ * — رویداد سالانه: نزدیک‌ترین تکرارِ آینده در همان روز شمسی محاسبه می‌شود
+ *   (ساعت ۱۲ ظهر برای پایداری منطقه‌زمانی؛ «امروز» هم جزو آینده حساب می‌شود).
+ */
+export function nextOccurrenceDate(
+  eventDate: Date,
+  yearly: boolean,
+  today: Date = new Date()
+): Date {
+  if (!yearly) return eventDate;
+  const jyNow = toJalali(today).jy;
+  const { jm, jd } = toJalali(eventDate);
+  const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+
+  // ساخت رخداد در یک سال شمسی مشخص — ساعت ۱۲ ظهر تا منطقه‌زمانی روز را جابه‌جا نکند
+  const occurrenceInYear = (jy: number): Date => {
+    // اگر روز در سال مقصد وجود نداشت (مثل ۳۰ اسفند در سال غیرکبیسه) به آخرین روز ماه محدود می‌شود
+    const day = Math.min(jd, jalaliMonthLength(jy, jm));
+    const d = fromJalali(jy, jm, day);
+    return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 12, 0, 0);
+  };
+
+  let candidate = occurrenceInYear(jyNow);
+  // مقایسه فقط روی تاریخ (بدون ساعت)
+  if (new Date(candidate.getFullYear(), candidate.getMonth(), candidate.getDate()) < startOfToday) {
+    candidate = occurrenceInYear(jyNow + 1);
+  }
+  return candidate;
+}
+
+/** سن شمسی: سال شمسیِ امروز منهای سال تولد شمسی (حداقل صفر) */
+export function jalaliAge(birthYear: number, today: Date = new Date()): number {
+  return Math.max(0, toJalali(today).jy - birthYear);
+}
+
 /** خوش‌آمد بر اساس ساعت روز */
 export function timeGreeting(hour: number): string {
   if (hour >= 5 && hour < 12) return "صبح بخیر";

@@ -92,13 +92,27 @@ export default function CalendarSection() {
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, PlannerEvent[]>();
-    for (const e of events) {
-      const k = dayKey(new Date(e.date));
+    const push = (k: string, e: PlannerEvent) => {
       if (!map.has(k)) map.set(k, []);
-      map.get(k)!.push(e);
+      const arr = map.get(k)!;
+      // جلوگیری از درج تکراری یک رویداد روی یک روز (تاریخ ذخیره‌شده + تکرار سالانه)
+      if (!arr.some((x) => x.id === e.id)) arr.push(e);
+    };
+    // ۱) تاریخ‌های ذخیره‌شده
+    for (const e of events) {
+      push(dayKey(new Date(e.date)), e);
+    }
+    // ۲) تکرار سالانه: نگاشت به همان روزِ شمسی در ماهِ نمای جاری
+    for (const e of events) {
+      if (!e.yearly) continue;
+      const { jm, jd } = toJalali(new Date(e.date));
+      if (jm !== view.jm) continue;
+      // اگر روز در این سال وجود نداشت (مثل ۳۰ اسفند در سال غیرکبیسه) به آخرین روز ماه محدود می‌شود
+      const day = Math.min(jd, jalaliMonthLength(view.jy, jm));
+      push(dayKey(fromJalali(view.jy, jm, day)), e);
     }
     return map;
-  }, [events]);
+  }, [events, view]);
 
   const tasksByDay = useMemo(() => {
     const map = new Map<string, typeof tasks>();
@@ -152,12 +166,13 @@ export default function CalendarSection() {
         }
       />
 
-      <div className="grid gap-5 lg:grid-cols-3">
+      {/* min-w-0: جلوگیری از سرریز افقی در موبایل — آیتم‌های گرید بدون آن کوچک نمی‌شوند */}
+      <div className="grid gap-5 min-w-0 lg:grid-cols-3">
         {/* ─── شبکه ماه ─── */}
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 rounded-3xl bg-card p-4 sm:p-6 card-glow"
+          className="lg:col-span-2 min-w-0 rounded-3xl bg-card p-3 sm:p-6 card-glow"
         >
           <div className="mb-4 flex items-center justify-between">
             <Button variant="ghost" size="icon" onClick={() => shiftMonth(-1)} aria-label="ماه قبل" className="rounded-xl hover:bg-purple-50 hover:text-purple-600">
@@ -213,7 +228,7 @@ export default function CalendarSection() {
                       : undefined
                   }
                   className={cn(
-                    "relative flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-bold transition-all cursor-pointer",
+                    "relative flex aspect-square flex-col items-center justify-center rounded-xl text-[13px] sm:text-sm font-bold transition-all cursor-pointer",
                     isSelected && "bg-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.04]",
                     !isSelected && isToday && "bg-orange-100 text-orange-600 ring-2 ring-orange-400",
                     !isSelected && !isToday && "hover:bg-accent",
@@ -271,10 +286,10 @@ export default function CalendarSection() {
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.06 }}
-          className="rounded-3xl bg-card p-5 card-glow"
+          className="min-w-0 rounded-3xl bg-card p-4 sm:p-5 card-glow"
         >
           <div className="mb-4 flex items-center justify-between gap-2">
-            <h3 className="font-extrabold text-[15px]">{formatJalaliFull(selected)}</h3>
+            <h3 className="min-w-0 truncate font-extrabold text-[15px]">{formatJalaliFull(selected)}</h3>
             <div className="flex shrink-0 items-center gap-1.5">
               {!selectedHoliday && persianWeekday(selected) === 6 && (
                 <Chip className="bg-muted text-muted-foreground">جمعه</Chip>

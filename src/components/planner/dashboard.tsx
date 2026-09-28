@@ -10,6 +10,7 @@ import {
   PartyPopper,
   Check,
   CalendarDays,
+  CalendarHeart,
   Target,
   ChevronLeft,
   Sun,
@@ -33,6 +34,7 @@ import {
   sameDay,
   relativeDaysFa,
   formatJalaliShort,
+  nextOccurrenceDate,
 } from "@/lib/date";
 import { PRIORITIES, CATEGORIES, habitIcon } from "@/lib/constants";
 import type { Task } from "@/lib/constants";
@@ -74,6 +76,13 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
     .filter((e) => new Date(e.date) >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
     .sort((a, b) => +new Date(a.date) - +new Date(b.date))
     .slice(0, 4);
+
+  // رویدادهای نزدیک — با درنظرگرفتن تکرار سالانه شمسی (تولد/سالگرد)
+  const upcomingOccasions = events
+    .map((e) => ({ e, occurrence: nextOccurrenceDate(new Date(e.date), e.yearly, now) }))
+    .filter(({ occurrence }) => occurrence >= new Date(now.getFullYear(), now.getMonth(), now.getDate()))
+    .sort((a, b) => +a.occurrence - +b.occurrence)
+    .slice(0, 3);
 
   const activeGoals = goals.filter((g) => g.current < g.target).slice(0, 3);
 
@@ -310,6 +319,56 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                     </div>
                     <Chip className="bg-purple-50 text-purple-600 shrink-0">
                       {relativeDaysFa(new Date(e.date))}
+                    </Chip>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </motion.section>
+
+          {/* رویدادهای نزدیک */}
+          <motion.section
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.24 }}
+            className="rounded-3xl bg-card p-5 card-glow min-w-0"
+          >
+            <div className="mb-3 flex items-center justify-between">
+              <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                  <CalendarHeart className="h-4 w-4" />
+                </span>
+                رویدادهای نزدیک
+              </h3>
+              <Button variant="ghost" size="sm" onClick={() => onNavigate("events")} className="h-8 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700">
+                همه
+              </Button>
+            </div>
+            {upcomingOccasions.length === 0 ? (
+              <button
+                onClick={() => onNavigate("events")}
+                className="w-full cursor-pointer py-3 text-center text-xs text-muted-foreground transition-colors hover:text-rose-600"
+              >
+                رویداد مهمی ثبت نشده
+              </button>
+            ) : (
+              <ul className="space-y-2.5">
+                {upcomingOccasions.map(({ e, occurrence }) => (
+                  <li key={e.id} className="flex min-w-0 items-center gap-2.5">
+                    <span
+                      className="h-2.5 w-2.5 shrink-0 rounded-full"
+                      style={{ backgroundColor: e.color }}
+                      aria-hidden
+                    />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-[13px] font-bold">{e.title}</p>
+                      <p className="text-[11px] text-muted-foreground">
+                        {formatJalaliShort(occurrence)}
+                        {e.yearly ? " — هر سال" : ""}
+                      </p>
+                    </div>
+                    <Chip className="shrink-0 bg-rose-50 text-rose-600">
+                      {relativeDaysFa(occurrence, now)}
                     </Chip>
                   </li>
                 ))}

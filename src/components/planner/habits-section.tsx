@@ -36,7 +36,7 @@ import {
   CHEERFUL_COLORS,
   type Habit,
 } from "@/lib/constants";
-import { faNum, dayKey, WEEKDAYS_SHORT, persianWeekday } from "@/lib/date";
+import { faNum, dayKey, WEEKDAYS_SHORT, persianWeekday, toJalali } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 /** محاسبه استریک (روزهای پشت‌سرهم) */
@@ -52,12 +52,13 @@ function streakOf(habit: Habit): number {
   return streak;
 }
 
-/** ۷ روز آخر (قدیمی → جدید) */
-function last7Days(): Date[] {
+/** روزهای هفته جاری ایران (شنبه → جمعه) */
+function currentWeekDays(): Date[] {
   const days: Date[] = [];
-  const now = new Date();
-  for (let i = 6; i >= 0; i--) {
-    days.push(new Date(now.getFullYear(), now.getMonth(), now.getDate() - i));
+  const today = new Date();
+  const sat = new Date(today.getFullYear(), today.getMonth(), today.getDate() - persianWeekday(today));
+  for (let i = 0; i < 7; i++) {
+    days.push(new Date(sat.getFullYear(), sat.getMonth(), sat.getDate() + i));
   }
   return days;
 }
@@ -68,7 +69,7 @@ export default function HabitsSection() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<Habit | null>(null);
   const todayKeyStr = dayKey(new Date());
-  const days7 = last7Days();
+  const weekDays = currentWeekDays();
 
   function openNew() {
     setEditing(null);
@@ -151,7 +152,7 @@ export default function HabitsSection() {
               const loggedDays = new Set(habit.logs.map((l) => l.date));
               const streak = streakOf(habit);
               const doneToday = loggedDays.has(todayKeyStr);
-              const weekDone = days7.filter((d) => loggedDays.has(dayKey(d))).length;
+              const weekDone = weekDays.filter((d) => dayKey(d) <= todayKeyStr && loggedDays.has(dayKey(d))).length;
               const weekPct = Math.min(100, Math.round((weekDone / Math.max(1, habit.targetPerWeek)) * 100));
 
               return (
@@ -161,7 +162,7 @@ export default function HabitsSection() {
                   initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
-                  className="rounded-3xl bg-card p-4 sm:p-5 card-glow"
+                  className="rounded-3xl bg-card p-3 sm:p-5 card-glow"
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -210,24 +211,27 @@ export default function HabitsSection() {
                   </div>
 
                   {/* شبکه هفتگی */}
-                  <div className="mt-4 flex items-center justify-between gap-1">
-                    {days7.map((d) => {
+                  <div className="mt-4 flex items-center justify-between gap-0.5 sm:gap-1">
+                    {weekDays.map((d) => {
                       const k = dayKey(d);
                       const isToday = k === todayKeyStr;
+                      const isFuture = k > todayKeyStr; // روزهای بعد از امروز قابل تیک نیستند
                       const done = loggedDays.has(k);
                       const wd = WEEKDAYS_SHORT[persianWeekday(d)];
                       return (
                         <button
                           key={k}
+                          disabled={isFuture}
                           onClick={() =>
                             toggle.mutate(
                               { id: habit.id, date: k },
                               { onError: (e) => toast.error(e.message) }
                             )
                           }
-                          aria-label={`${wd} ${done ? "انجام شده" : "انجام نشده"}`}
+                          aria-label={isFuture ? `${wd} — روز آینده` : `${wd} ${done ? "انجام شده" : "انجام نشده"}`}
                           className={cn(
-                            "flex flex-1 flex-col items-center gap-1 rounded-xl py-1.5 transition-all cursor-pointer active:scale-90",
+                            "flex flex-1 flex-col items-center gap-0.5 rounded-xl py-1.5 transition-all",
+                            isFuture ? "cursor-default opacity-40" : "cursor-pointer active:scale-90",
                             isToday && "bg-accent"
                           )}
                         >
@@ -237,14 +241,18 @@ export default function HabitsSection() {
                           <motion.span
                             whileTap={{ scale: 0.8 }}
                             className={cn(
-                              "flex h-8 w-8 items-center justify-center rounded-full border-2 text-white transition-colors",
+                              "flex h-7 w-7 items-center justify-center rounded-full border-2 text-white transition-colors sm:h-8 sm:w-8",
                               done ? "border-transparent shadow-sm" : "border-border bg-background",
                               isToday && !done && "border-dashed"
                             )}
                             style={done ? { backgroundColor: habit.color } : undefined}
                           >
-                            {done && <Check className="h-4 w-4" strokeWidth={3} />}
+                            {done && <Check className="h-3.5 w-3.5 sm:h-4 sm:w-4" strokeWidth={3} />}
                           </motion.span>
+                          {/* عدد روز شمسی برای وضوح بیشتر */}
+                          <span className="text-[9px] font-bold text-muted-foreground/80 tabular-nums">
+                            {faNum(toJalali(d).jd)}
+                          </span>
                         </button>
                       );
                     })}
