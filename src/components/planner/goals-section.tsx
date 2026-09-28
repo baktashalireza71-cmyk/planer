@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import JalaliDatePicker from "./jalali-date-picker";
 import {
   Dialog,
   DialogContent,
@@ -32,7 +33,7 @@ import { toast } from "sonner";
 import { SectionHeader, EmptyState, DeleteConfirm, Chip, ProgressRing, SectionSkeleton } from "./shared";
 import { useGoals, useGoalMutations } from "@/hooks/use-planner";
 import { CHEERFUL_COLORS, type Goal } from "@/lib/constants";
-import { faNum, formatJalaliMedium, relativeDaysFa } from "@/lib/date";
+import { faNum, formatJalaliMedium, relativeDaysFa, dayKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 export default function GoalsSection() {
@@ -354,7 +355,8 @@ function GoalDialog({
     setCurrent(String(editing?.current ?? 0));
     setUnit(editing?.unit ?? "%");
     setColor(editing?.color ?? CHEERFUL_COLORS[4]);
-    setDeadline(editing?.deadline ? editing.deadline.slice(0, 10) : "");
+    // dayKey ایمن‌تر از slice است؛ با منطقه‌زمانی روز جابه‌جا نمی‌شود
+    setDeadline(editing?.deadline ? dayKey(new Date(editing.deadline)) : "");
   } else if (!open && wasOpen) {
     setWasOpen(false);
   }
@@ -474,12 +476,11 @@ function GoalDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="goal-deadline">ضرب‌الاجل (اختیاری)</Label>
-              <Input
+              <JalaliDatePicker
                 id="goal-deadline"
-                type="date"
-                value={deadline}
-                onChange={(e) => setDeadline(e.target.value)}
-                className="rounded-xl"
+                value={deadline || null}
+                onChange={(k) => setDeadline(k ?? "")}
+                clearable
               />
             </div>
           </div>

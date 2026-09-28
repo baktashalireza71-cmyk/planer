@@ -93,6 +93,12 @@ export function sameDay(a: Date, b: Date): boolean {
   );
 }
 
+/** ساخت Date از کلید میلادی «YYYY-MM-DD» (ساعت ۱۲ ظهر برای پایداری منطقه‌زمانی) */
+export function dateFromDayKey(key: string): Date {
+  const [y, m, d] = key.split("-").map(Number);
+  return new Date(y, (m || 1) - 1, d || 1, 12, 0, 0);
+}
+
 // ─────────────────────────────────────────────
 //  فرمت‌های نمایشی
 // ─────────────────────────────────────────────
@@ -101,6 +107,15 @@ export function formatJalaliFull(date: Date): string {
   const { jy, jm, jd } = toJalali(date);
   const weekday = WEEKDAYS_FA[persianWeekday(date)];
   return `${weekday} ${faNum(jd)} ${JALALI_MONTHS[jm - 1]} ${faNum(jy)}`;
+}
+
+/** ساعت دیجیتال فارسی «۱۴:۰۵» یا «۱۴:۰۵:۰۹» */
+export function formatClockFa(date: Date, withSeconds = false): string {
+  const h = String(date.getHours()).padStart(2, "0");
+  const m = String(date.getMinutes()).padStart(2, "0");
+  if (!withSeconds) return faNum(`${h}:${m}`);
+  const s = String(date.getSeconds()).padStart(2, "0");
+  return faNum(`${h}:${m}:${s}`);
 }
 
 /** «۱۵ خرداد» */

@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import JalaliDatePicker from "./jalali-date-picker";
 import {
   Dialog,
   DialogContent,
@@ -49,7 +50,7 @@ import {
   type Priority,
   type Category,
 } from "@/lib/constants";
-import { faNum, relativeDaysFa } from "@/lib/date";
+import { faNum, relativeDaysFa, dayKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 type FilterKey = "all" | "today" | "overdue" | "done";
@@ -483,7 +484,8 @@ function TaskDialog({
     setDescription(task?.description ?? "");
     setPriority(task?.priority ?? "MEDIUM");
     setCategory(task?.category ?? "PERSONAL");
-    setDueDate(task?.dueDate ? task.dueDate.slice(0, 10) : "");
+    // dayKey ایمن‌تر از slice است؛ با منطقه‌زمانی روز جابه‌جا نمی‌شود
+    setDueDate(task?.dueDate ? dayKey(new Date(task.dueDate)) : "");
     setKey((k) => k + 1);
   } else if (!open && wasOpen) {
     setWasOpen(false);
@@ -582,12 +584,11 @@ function TaskDialog({
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="task-due">سررسید (اختیاری)</Label>
-              <Input
+              <JalaliDatePicker
                 id="task-due"
-                type="date"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-                className="rounded-xl"
+                value={dueDate || null}
+                onChange={(k) => setDueDate(k ?? "")}
+                clearable
               />
             </div>
           </div>

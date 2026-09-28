@@ -11,8 +11,10 @@ import {
   StickyNote,
   BarChart3,
   CalendarCheck2,
+  Clock,
 } from "lucide-react";
-import { formatJalaliFull, faNum, toJalali } from "@/lib/date";
+import { formatJalaliFull, formatClockFa, faNum, toJalali, JALALI_MONTHS } from "@/lib/date";
+import { useNow } from "@/hooks/use-clock";
 import { cn } from "@/lib/utils";
 import Dashboard from "./dashboard";
 import TasksSection from "./tasks-section";
@@ -55,6 +57,8 @@ export default function AppShell() {
     () => true,
     () => false
   );
+
+  const liveNow = useNow();
 
   const today = new Date();
   const { jd, jm, jy } = toJalali(today);
@@ -114,9 +118,13 @@ export default function AppShell() {
           </nav>
 
           <div className="mt-auto rounded-2xl bg-gradient-to-br from-orange-50 to-pink-50 border border-orange-100 p-4">
-            <p className="text-xs font-bold text-orange-900/80 mb-1">امروز</p>
+            <p className="text-[11px] font-bold text-orange-900/80">ساعت</p>
+            <p className="text-2xl font-black tabular-nums text-orange-950 leading-tight">
+              {liveNow ? formatClockFa(liveNow, true) : "۰۰:۰۰:۰۰"}
+            </p>
+            <p className="mt-2.5 text-xs font-bold text-orange-900/80 mb-1">امروز</p>
             <p className="text-sm font-extrabold text-orange-950">
-              {mounted ? formatJalaliFull(today) : `${faNum(jd)} ...`}
+              {liveNow ? formatJalaliFull(liveNow) : `${faNum(jd)} ...`}
             </p>
             <p className="text-[11px] text-orange-700/70 mt-1">
               یک روز خوب در انتظار توست ☀
@@ -139,8 +147,14 @@ export default function AppShell() {
                 </p>
               </div>
             </div>
-            <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 shadow-sm">
-              {faNum(jd)} {["فروردین","اردیبهشت","خرداد","تیر","مرداد","شهریور","مهر","آبان","آذر","دی","بهمن","اسفند"][jm - 1]} {faNum(jy)}
+            <div className="flex items-center gap-2">
+              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 shadow-sm">
+                {faNum(jd)} {JALALI_MONTHS[jm - 1]} {faNum(jy)}
+              </div>
+              <div className="rounded-full bg-white/80 backdrop-blur border border-orange-100 px-3 py-1.5 text-xs font-bold text-orange-600 shadow-sm flex items-center gap-1">
+                <Clock className="h-3.5 w-3.5" />
+                <span className="tabular-nums">{liveNow ? formatClockFa(liveNow) : "۰۰:۰۰"}</span>
+              </div>
             </div>
           </header>
 

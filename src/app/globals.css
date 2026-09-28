@@ -153,9 +153,3 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
-
-/* حذف فلش آیکون input[type=date] در صفحات تاریک */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.55;
-}

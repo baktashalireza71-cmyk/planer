@@ -5,6 +5,7 @@ import Image from "next/image";
 import {
   ListTodo,
   CalendarClock,
+  Clock,
   Flame,
   PartyPopper,
   Check,
@@ -18,10 +19,12 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProgressRing, StatCard, Chip } from "./shared";
+import { useNow } from "@/hooks/use-clock";
 import { useTasks, useHabits, useEvents, useGoals, useTaskMutations, useHabitMutations } from "@/hooks/use-planner";
 import type { TabKey } from "./app-shell";
 import {
   faNum,
+  formatClockFa,
   formatJalaliFull,
   toJalali,
   timeGreeting,
@@ -51,6 +54,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
   const { update: updateTask } = useTaskMutations();
   const { toggle: toggleHabit } = useHabitMutations();
 
+  const liveNow = useNow();
   const now = new Date();
   const todayKey = dayKey(now);
 
@@ -88,9 +92,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
         <div aria-hidden className="absolute -bottom-14 right-1/4 h-44 w-44 rounded-full bg-pink-300/25 blur-2xl" />
         <div className="relative flex items-center justify-between gap-4">
           <div className="min-w-0">
-            <div className="flex items-center gap-2 text-orange-100">
+            <div className="flex flex-wrap items-center gap-2 text-orange-100">
               <GreetingIcon hour={now.getHours()} />
               <span className="text-xs sm:text-sm font-semibold">{timeGreeting(now.getHours())}</span>
+              {/* ساعت زنده — چیپ شیشه‌ای */}
+              <div className="bg-white/20 backdrop-blur rounded-full px-3 py-1.5 text-xs sm:text-sm font-bold text-white flex items-center gap-1.5">
+                <Clock className="h-3.5 w-3.5" />
+                <span className="tabular-nums">{liveNow ? formatClockFa(liveNow, true) : "۰۰:۰۰:۰۰"}</span>
+              </div>
             </div>
             <h2 className="mt-1 text-xl sm:text-3xl font-black leading-snug">
               امروز رو برنامه‌ریزی کن!

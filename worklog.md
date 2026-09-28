@@ -81,3 +81,95 @@ Stage Summary:
 - اپ پلنر کامل و آماده دیپلوی: ۷ بخش (خانه/کارها/تقویم/عادت‌ها/اهداف/یادداشت‌ها/آمار)
 - فایل‌های کلیدی: src/components/planner/* , src/lib/* , src/hooks/use-planner.ts , src/app/*
 - برای گیت‌هاب: README و کد کامنت‌شده فارسی؛ اسکیما در prisma/schema.prisma
+
+---
+Task ID: 3-c
+Agent: general-purpose
+Task: افزودن ساعت زنده (ساعت دیجیتال فارسی) به کارت خوش‌آمد داشبورد، کارت «امروز» سایدبار دسکتاپ و هدر موبایل
+
+Work Log:
+- خواندن worklog.md و فایل‌های اجباری: src/hooks/use-clock.ts (useNow هویدریشن‌سازگار) و src/lib/date.ts (formatClockFa، faNum، formatJalaliFull، toJalali)
+- dashboard.tsx: import های Clock (lucide)، useNow و formatClockFa اضافه شد؛ در کارت گرادیانی خوش‌آمد، یک چیپ شیشه‌ای `bg-white/20 backdrop-blur rounded-full px-3 py-1.5 text-xs sm:text-sm font-bold text-white flex items-center gap-1.5` کنار ردیف سلام («صبح بخیر» و...) قرار گرفت با آیکون Clock (h-3.5 w-3.5) و زمان زنده با ثانیه؛ رندر با `liveNow ? formatClockFa(liveNow, true) : "۰۰:۰۰:۰۰"` (هیچ new Date() جدیدی برای نمایش ساعت ساخته نشد) و کلاس `tabular-nums` روی متن زمان برای جلوگیری از لرزش ارقام؛ به ردیف سلام فقط `flex-wrap` اضافه شد تا در موبایل امن باشد — ساختار کارت دست‌نخورده ماند
+- app-shell.tsx: import های Clock، useNow، formatClockFa و JALALI_MONTHS (به‌جای آرایه inline ماه‌ها — همان محتوا) اضافه شد؛ `const liveNow = useNow();` در AppShell
+  - کارت «امروز» پایین سایدبار دسکتاپ: بالای کارت ساعت دیجیتال بزرگ اضافه شد — برچسب «ساعت» (text-[11px] font-bold) و زمان `formatClockFa(liveNow, true)` با `text-2xl font-black tabular-nums`؛ تاریخ شمسی «امروز» زیر آن حفظ شد با منطق `{liveNow ? formatJalaliFull(liveNow) : \`${faNum(jd)} ...\`}` (liveNow جایگزین mounted شد تا تاریخ همیشه تازه بماند)؛ خط «یک روز خوب در انتظار توست ☀» حفظ شد؛ `jd, jm, jy` از toJalali(today) برای fallback بدون هیدریشن باقی است
+  - هدر موبایل (lg:hidden): چیپ تاریخ ثابت داخل یک کانتینر `flex items-center gap-2` قرار گرفت و یک چیپ دوم هم‌سبک (bg-white/80 backdrop-blur border-orange-100 ...) با آیکون Clock و `{liveNow ? formatClockFa(liveNow) : "۰۰:۰۰"}` + tabular-nums کنار آن اضافه شد؛ زیرنویس پلنر (mounted ? formatJalaliFull(today) : "…") دست‌نخورده ماند
+- رعایت قواعد: هیچ فایل دیگری تغییر نکرد، وابستگی جدیدی اضافه نشد، همه متن‌ها فارسی، dev server اجرا نشد
+
+Stage Summary:
+- سه نقطه‌گذاری ساعت زنده کامل شد: چیپ شیشه‌ای داخل هیرو داشبورد (با ثانیه)، ساعت دیجیتال بزرگ بالای کارت «امروز» سایدبار، و چیپ ساعت کنار چیپ تاریخ در هدر موبایل (بدون ثانیه)
+- هم‌ترازی با use-clock.ts: در SSR و اولین رندر کلاینت «۰۰:۰۰:۰۰» / «۰۰:۰۰» ثابت نمایش داده می‌شود (بدون mismatch)، سپس به‌روزرسانی هر ثانیه؛ ارقام با tabular-nums پایدارند
+- تأیید: `bun run lint` بدون خطا/هشدار جدید؛ `npx tsc --noEmit` فقط خطاهای قدیمی examples/ و skills/ (مستند در Task 2-a) — صفر خطای جدید در دو فایل تغییر‌یافته
+
+---
+
+Task ID: 3-a
+Agent: general-purpose
+Task: حذف ورودی‌های میلادی type="date" از دیالوگ کار و هدف و جایگزینی با تقویم شمسی (JalaliDatePicker)
+
+Work Log:
+- خواندن worklog.md، src/lib/date.ts و کامپوننت آماده jalali-date-picker.tsx برای درک قرارداد مقدار (کلید میلادی YYYY-MM-DD با نمایش کاملاً شمسی)
+- tasks-section.tsx: جایگزینی کامل Input میلادی «سررسید (اختیاری)» در TaskDialog با JalaliDatePicker (value={dueDate || null}، onChange={(k) => setDueDate(k ?? "")}، clearable) با حفظ Label
+- tasks-section.tsx: ایمن‌سازی مقداردهی اولیه در open-effect — تبدیل task.dueDate.slice(0, 10) به dayKey(new Date(task.dueDate)) تا برای ساعت‌های نزدیک نیمه‌شب UTC روز جابه‌جا نشود (کامنت فارسی اضافه شد)
+- tasks-section.tsx: افزودن import JalaliDatePicker از "./jalali-date-picker" و افزودن dayKey به import موجود از "@/lib/date" (faNum, relativeDaysFa, dayKey)
+- goals-section.tsx: جایگزینی Input میلادی «ضرب‌الاجل (اختیاری)» در GoalDialog با JalaliDatePicker (همان الگوی بالا با clearable) با حفظ Label
+- goals-section.tsx: تبدیل editing.deadline.slice(0, 10) به dayKey(new Date(editing.deadline)) در open-effect (کامنت فارسی)
+- goals-section.tsx: افزودن import JalaliDatePicker و افزودن dayKey به import موجود از "@/lib/date"
+- بررسی شد که Input در هر دو فایل هنوز استفاده می‌شود (زیرکار/عنوان کار در tasks؛ عنوان/مقدار/پیشرفت/واحد در goals) پس import آن حذف نشد
+- هندلر submit دست‌نخورده ماند: تبدیل `${dueDate}T12:00:00` به ISO با ساعت ۱۲ ظهر برای پایداری منطقه‌زمانی
+- تأیید نهایی: هیچ type="date" در این دو فایل باقی نمانده است (تنها مورد باقی‌مانده در calendar-section.tsx است که خارج از محدوده این تسک بود)
+- `bun run lint` بدون هیچ خطا/هشدار؛ `npx tsc --noEmit` فقط خطاهای قدیمی و بی‌ربط در examples/ و skills/ دارد — صفر خطا در src/components/planner
+
+Stage Summary:
+- هر دو دیالوگ کار و هدف اکنون کاملاً با تقویم شمسی کار می‌کنند: نمایش، انتخاب، تعطیلات قرمز، «برو به امروز» و دکمه «حذف تاریخ»
+- قرارداد ذخیره‌سازی بک‌اند بدون تغییر ماند (کلید میلادی YYYY-MM-DD → ISO با T12:00:00)؛ فقط لایه UI شمسی شد
+- رفع پنهان باگ منطقه‌زمانی: خواندن dueDate/deadline از API دیگر با slice(0, 10) روز را نمی‌پراند (dayKey روی Date محلی)
+- فایل‌های تغییر‌یافته: src/components/planner/tasks-section.tsx و src/components/planner/goals-section.tsx — بدون تغییر فایل دیگر
+
+---
+Task ID: 3-b
+Agent: general-purpose
+Task: ارتقای تقویم با تعطیلات رسمی ایران + حذف input میلادی از دیالوگ رویداد
+
+Work Log:
+- خواندن worklog.md، lib/date.ts، lib/iran-holidays.ts و jalali-date-picker.tsx قبل از شروع
+- شبکه ماه: monthHolidays با useMemo و getHolidaysInRange(از اول تا آخر ماه شمسی نمای جاری)؛ در هر خانه day-cell مقدار holiday و isFriday محاسبه می‌شود
+- شماره روز تعطیل (رسمی یا جمعه، غیر از انتخاب‌شده/امروز) با text-red-500 (داخل span تا با muted روزهای گذشته تداخل نکند)؛ استایل انتخاب (متن سفید) و امروز حفظ شد
+- title روی دکمه روز: «عنوان تعطیلی — تاریخ قمری» برای نمایش hover
+- تعطیلات غیرجمعه: نقطه قرمز bg-red-400 در absolute top-1 (وسط افقی) متمایز از نقطه‌های رویداد/سررسید پایین خانه
+- لِجند پایین تقویم: آیتم «تعطیل رسمی» با دایره bg-red-400 اضافه شد (آیتم‌های قبلی حفظ شدند)
+- پنل روز انتخابی: اگر getIranianHoliday(selected) تعطیلی داشته باشد باکس rounded-2xl bg-red-50 border-red-100 text-red-700 با عنوان font-extrabold + تاریخ قمری text-[11px] زیر عنوان نمایش داده می‌شود؛ در غیر این صورت اگر جمعه باشد چیپ خاکستری «جمعه» کنار عنوان
+- بخش «تعطیلات پیش‌رو» با upcomingIranianHolidays(new Date(), 4) (useMemo با deps خالی) بعد از بلوک‌های شرطی (خارج از ternary) در همان سکشن: border-t border-dashed pt-3 mt-4، تیتر با آیکون قرمز CalendarHeart و text-[12px] font-extrabold، ردیف‌ها با نقطه قرمز + عنوان truncate 13px bold + formatJalaliShort + چیپ relativeDaysFa — حتی در حالت EmptyState هم دیده می‌شود
+- دیالوگ رویداد: جایگزینی Input type="date" با JalaliDatePicker (value={date || null} و onChange={k => setDate(k ?? "")}) با حفظ Label «تاریخ»؛ init باز شدن با dayKey(editing ? new Date(editing.date) : defaultDate)؛ ارسال زمان‌بندی «ساعت» و تبدیل `${date}T12:00:00` تغییر نکرد؛ import Input به‌خاطر فیلد عنوان باقی ماند
+- فقط calendar-section.tsx ویرایش شد؛ dev server اجرا نشد
+
+Stage Summary:
+- lint (bun run lint): بدون خطا؛ tsc --noEmit: فقط خطاهای قدیمی examples/ و skills/ (مرتبط با calendar-section: صفر)
+- دیالوگ رویداد دیگر هیچ type="date" ندارد (فقط type="time" برای ساعت باقی است) و تاریخ با تقویم شمسی JalaliDatePicker انتخاب می‌شود
+- تعطیلات رسمی (خورشیدی + قمری) در شبکه ماه، پنل روز، لجند و لیست پیش‌رو با قرمز نمایش داده می‌شوند و theme بنفش تقویم حفظ شده است
+
+---
+Task ID: 3
+Agent: main (Z.ai Code) + subagents 3-a/3-b/3-c
+Task: حذف کامل تقویم میلادی، ساعت زنده، و تعطیلات دقیق رسمی ایران
+
+Work Log:
+- تحقیق وب (timeanddate.com/holidays/iran سال‌های 2025/2026/2027 + منابع فارسی): استخراج تاریخ دقیق همه تعطیلات قمری رسمی ایران
+- کشف مهم: «عزای عمومی» اسفند ۱۴۰۴ و ۱۵ تیر ۱۴۰۵ رویدادهای یک‌باره بودند (نه تعطیلات تکرارشونده) و در دیتاست ثابت قرار نگرفتند
+- صحت‌سنجی: تبدیل jalaali-js با تقویم رسمی (۱ فروردین ۱۴۰۴ = ۲۱ مارس ۲۰۲۵) سازگار است؛ عید فطر ۱۴۰۴ = ۱۱-۱۲ فروردین ✓
+- ساخت src/lib/iran-holidays.ts: تعطیلات خورشیدی ثابت (۱۰ روز ملی) + جدول قمری سال‌به‌سال (۴۲ رکورد، ۱۴۴۶-۱۴۵۱ = شمسی ۱۴۰۳ تا ۱۴۰۶) با تاریخ قمری متن هر تعطیلی
+- ساخت src/hooks/use-clock.ts: هوک ساعت زنده hydration-safe با useSyncExternalStore
+- افزودن dateFromDayKey و formatClockFa به lib/date.ts
+- ساخت src/components/planner/jalali-date-picker.tsx: پاپ‌اور تقویم شمسی (جمعه/تعطیل قرمز، tooltip عنوان تعطیلی، ناوبری ماه، دکمه امروز، قابل پاک‌کردن)
+- زیرعامل 3-a: جایگزینی input type=date در دیالوگ کار و هدف با پیکر شمسی + رفع باگ timezone در slice(0,10) با dayKey
+- زیرعامل 3-b: تقویم شمسی = روزهای تعطیل قرمز + نقطه سرخ + legend «تعطیل رسمی» + بج تعطیلی و تاریخ قمری در پنل روز + بخش «تعطیلات پیش‌رو» (۴ مورد با شمارش معکوس) + دیالوگ رویداد با پیکر شمسی
+- زیرعامل 3-c: ساعت زنده با ثانیه در کارت خوش‌آمد داشبورد (chip شیشه‌ای)، ساعت بزرگ در کارت «امروز» سایدبار دسکتاپ، chip ساعت در هدر موبایل
+- پاک‌سازی: حذف CSS input[type=date]، حذف کامپوننت ui/calendar.tsx (react-day-picker میلادی، استفاده‌نشده)
+- تست مرورگر (Agent Browser): داشبورد/تقویم/دیالوگ کار-رویداد-هدف/موبایل 390px — ساعت در حال تیک، تعطیلات اسفند ۱۴۰۵ (۹،۱۹،۲۰) + ۲۹ اسفند ملی شدن نفت قرمز ✓
+- تست انتها-به-انتها: رویداد روی ۲۰ مهر ۱۴۰۵ ذخیره شد = 2026-10-12 در API ✓، کار با «۲۳ روز مانده» ✓
+- پاک‌سازی داده‌های تست؛ کنسول بدون خطا؛ lint و tsc پاس
+
+Stage Summary:
+- کل اپلیکیشن ۱۰۰٪ شمسی است: هیچ input type=date میلادی در کل src وجود ندارد
+- تعطیلات رسمی ایران دقیق: خورشیدی (همیشگی) + قمری تا پایان ۱۴۰۶؛ برای سال‌های بعد فقط افزودن ردیف به LUNAR_HOLIDAYS
+- ساعت زنده در ۳ نقطه: هرو داشبورد، سایدبار دسکتاپ، هدر موبایل
+- فایل‌های جدید: src/lib/iran-holidays.ts، src/hooks/use-clock.ts، src/components/planner/jalali-date-picker.tsx

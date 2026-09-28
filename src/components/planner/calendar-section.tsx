@@ -11,6 +11,7 @@ import {
   Sparkles,
   Pencil,
   ListTodo,
+  CalendarHeart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -41,9 +42,17 @@ import {
   dayKey,
   sameDay,
   formatJalaliFull,
+  formatJalaliShort,
+  relativeDaysFa,
 } from "@/lib/date";
+import {
+  getIranianHoliday,
+  getHolidaysInRange,
+  upcomingIranianHolidays,
+} from "@/lib/iran-holidays";
 import { CHEERFUL_COLORS, type PlannerEvent } from "@/lib/constants";
 import { cn } from "@/lib/utils";
+import JalaliDatePicker from "./jalali-date-picker";
 
 export default function CalendarSection() {
   const { data: events = [], isLoading } = useEvents();
@@ -67,6 +76,19 @@ export default function CalendarSection() {
     while (cells.length % 7 !== 0) cells.push(null);
     return cells;
   }, [view]);
+
+  // تعطیلات رسمی ماه جاریِ نما (کلید = dayKey میلادی)
+  const monthHolidays = useMemo(
+    () =>
+      getHolidaysInRange(
+        fromJalali(view.jy, view.jm, 1),
+        fromJalali(view.jy, view.jm, jalaliMonthLength(view.jy, view.jm))
+      ),
+    [view]
+  );
+
+  // تعطیلات رسمی پیش‌رو برای پنل کناری
+  const upcoming = useMemo(() => upcomingIranianHolidays(new Date(), 4), []);
 
   const eventsByDay = useMemo(() => {
     const map = new Map<string, PlannerEvent[]>();
@@ -110,6 +132,7 @@ export default function CalendarSection() {
 
   const selectedEvents = eventsByDay.get(dayKey(selected)) ?? [];
   const selectedTasks = tasksByDay.get(dayKey(selected)) ?? [];
+  const selectedHoliday = getIranianHoliday(selected);
 
   return (
     <div className="space-y-5">
@@ -175,11 +198,20 @@ export default function CalendarSection() {
               const dayEvents = eventsByDay.get(dayKey(date)) ?? [];
               const dayTasksDue = tasksByDay.get(dayKey(date)) ?? [];
               const isPast = date < today && !isToday;
+              const holiday = monthHolidays.get(dayKey(date));
+              const isFriday = persianWeekday(date) === 6;
+              // روز تعطیل (رسمی یا جمعه) — استایل امروز/انتخاب‌شده دست‌نخورده می‌ماند
+              const isRedDay = !isSelected && !isToday && (!!holiday || isFriday);
 
               return (
                 <button
                   key={i}
                   onClick={() => setSelected(date)}
+                  title={
+                    holiday
+                      ? `${holiday.title}${holiday.hijri ? ` — ${holiday.hijri}` : ""}`
+                      : undefined
+                  }
                   className={cn(
                     "relative flex aspect-square flex-col items-center justify-center rounded-xl text-sm font-bold transition-all cursor-pointer",
                     isSelected && "bg-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.04]",
@@ -188,7 +220,16 @@ export default function CalendarSection() {
                     isPast && !isSelected && "text-muted-foreground/50"
                   )}
                 >
-                  {faNum(toJalali(date).jd)}
+                  <span className={cn(isRedDay && "text-red-500")}>
+                    {faNum(toJalali(date).jd)}
+                  </span>
+                  {/* نقطه قرمز تعطیلی رسمی (غیرجمعه) — بالای خانه، جدا از نقطه‌های پایین */}
+                  {holiday && !isFriday && !isSelected && (
+                    <span
+                      className="absolute top-1 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-red-400"
+                      aria-hidden
+                    />
+                  )}
                   <span className="absolute bottom-1 flex gap-0.5" dir="ltr">
                     {dayEvents.slice(0, 2).map((e) => (
                       <span
@@ -219,6 +260,9 @@ export default function CalendarSection() {
             <span className="flex items-center gap-1">
               <span className="h-2 w-2 rounded-full bg-purple-400" /> رویداد
             </span>
+            <span className="flex items-center gap-1">
+              <span className="h-2 w-2 rounded-full bg-red-400" /> تعطیل رسمی
+            </span>
           </div>
         </motion.section>
 
@@ -229,10 +273,31 @@ export default function CalendarSection() {
           transition={{ delay: 0.06 }}
           className="rounded-3xl bg-card p-5 card-glow"
         >
-          <div className="mb-4 flex items-center justify-between">
+          <div className="mb-4 flex items-center justify-between gap-2">
             <h3 className="font-extrabold text-[15px]">{formatJalaliFull(selected)}</h3>
-            {sameDay(selected, today) && <Chip className="bg-orange-100 text-orange-600">امروز</Chip>}
+            <div className="flex shrink-0 items-center gap-1.5">
+              {!selectedHoliday && persianWeekday(selected) === 6 && (
+                <Chip className="bg-muted text-muted-foreground">جمعه</Chip>
+              )}
+              {sameDay(selected, today) && (
+                <Chip className="bg-orange-100 text-orange-600">امروز</Chip>
+              )}
+            </div>
           </div>
+
+          {selectedHoliday && (
+            <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 px-3 py-2.5 text-red-700">
+              <p className="flex items-center gap-1.5 text-[13px] font-extrabold">
+                <CalendarHeart className="h-4 w-4 shrink-0" />
+                {selectedHoliday.title}
+              </p>
+              {selectedHoliday.hijri && (
+                <p className="mt-0.5 text-[11px] font-bold text-red-500/90">
+                  {selectedHoliday.hijri}
+                </p>
+              )}
+            </div>
+          )}
 
           {isLoading ? (
             <SectionSkeleton count={2} />
@@ -325,6 +390,33 @@ export default function CalendarSection() {
               )}
             </div>
           )}
+
+          {/* تعطیلات رسمی پیش‌رو — خارج از بلوک‌های شرطی، همیشه نمایش داده می‌شود */}
+          <div className="mt-4 border-t border-dashed border-border pt-3">
+            <p className="mb-2.5 flex items-center gap-1.5 text-[12px] font-extrabold text-red-600">
+              <CalendarHeart className="h-3.5 w-3.5" />
+              تعطیلات پیش‌رو
+            </p>
+            <ul className="space-y-1.5">
+              {upcoming.map(({ date, holiday }) => (
+                <li
+                  key={`${dayKey(date)}-${holiday.title}`}
+                  className="flex items-center gap-2 rounded-xl bg-red-50/60 px-2.5 py-2"
+                >
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-red-400" aria-hidden />
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-bold">
+                    {holiday.title}
+                  </span>
+                  <span className="shrink-0 text-[11px] font-bold text-muted-foreground">
+                    {formatJalaliShort(date)}
+                  </span>
+                  <Chip className="shrink-0 bg-red-100 text-red-600">
+                    {relativeDaysFa(date)}
+                  </Chip>
+                </li>
+              ))}
+            </ul>
+          </div>
         </motion.section>
       </div>
 
@@ -386,7 +478,7 @@ function EventDialog({
   if (open && !wasOpen) {
     setWasOpen(true);
     setTitle(editing?.title ?? "");
-    setDate((editing ? new Date(editing.date) : defaultDate).toISOString().slice(0, 10));
+    setDate(dayKey(editing ? new Date(editing.date) : defaultDate));
     setTime(editing?.time ?? "");
     setColor(editing?.color ?? CHEERFUL_COLORS[3]);
   } else if (!open && wasOpen) {
@@ -433,13 +525,10 @@ function EventDialog({
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1.5">
               <Label htmlFor="event-date">تاریخ</Label>
-              <Input
+              <JalaliDatePicker
                 id="event-date"
-                type="date"
-                value={date}
-                onChange={(e) => setDate(e.target.value)}
-                required
-                className="rounded-xl"
+                value={date || null}
+                onChange={(k) => setDate(k ?? "")}
               />
             </div>
             <div className="space-y-1.5">
