@@ -1,0 +1,94 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:/home/z/my-project/db/custom.db"
+}
+
+// ─────────────────────────────────────────────
+//  کارها (Tasks)
+// ─────────────────────────────────────────────
+model Task {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  completed   Boolean   @default(false)
+  priority    String    @default("MEDIUM") // LOW | MEDIUM | HIGH
+  category    String    @default("PERSONAL") // WORK | PERSONAL | STUDY | HEALTH | OTHER
+  dueDate     DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  subtasks    Subtask[]
+}
+
+model Subtask {
+  id     String  @id @default(cuid())
+  title  String
+  done   Boolean @default(false)
+  taskId String
+  task   Task    @relation(fields: [taskId], references: [id], onDelete: Cascade)
+}
+
+// ─────────────────────────────────────────────
+//  عادت‌ها (Habits)
+// ─────────────────────────────────────────────
+model Habit {
+  id            String     @id @default(cuid())
+  title         String
+  icon          String     @default("Sparkles")
+  color         String     @default("#F97316")
+  targetPerWeek Int        @default(7)
+  createdAt     DateTime   @default(now())
+  logs          HabitLog[]
+}
+
+model HabitLog {
+  id      String @id @default(cuid())
+  habitId String
+  habit   Habit  @relation(fields: [habitId], references: [id], onDelete: Cascade)
+  date    String // "YYYY-MM-DD"
+  @@unique([habitId, date])
+}
+
+// ─────────────────────────────────────────────
+//  اهداف (Goals)
+// ─────────────────────────────────────────────
+model Goal {
+  id          String    @id @default(cuid())
+  title       String
+  description String?
+  target      Int       @default(100)
+  current     Int       @default(0)
+  unit        String    @default("%")
+  color       String    @default("#10B981")
+  deadline    DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+// ─────────────────────────────────────────────
+//  یادداشت‌ها (Notes)
+// ─────────────────────────────────────────────
+model Note {
+  id        String   @id @default(cuid())
+  title     String
+  content   String   @default("")
+  color     String   @default("#FEF3C7")
+  pinned    Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+//  رویدادها (Events) - تقویم
+// ─────────────────────────────────────────────
+model Event {
+  id        String   @id @default(cuid())
+  title     String
+  date      DateTime
+  time      String?
+  color     String   @default("#8B5CF6")
+  note      String?
+  createdAt DateTime @default(now())
+}
