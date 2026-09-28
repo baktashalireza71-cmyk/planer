@@ -30,6 +30,13 @@ import { cn } from "@/lib/utils";
 
 const CHART_COLORS = ["#F97316", "#14B8A6", "#EC4899", "#8B5CF6", "#10B981"];
 
+/** نسخه شب برچسب اولویت‌ها (text-*-600 در constants در شب کم‌کنتراست است) */
+const PRI_TEXT_DARK: Record<Priority, string> = {
+  HIGH: "dark:text-red-400",
+  MEDIUM: "dark:text-amber-400",
+  LOW: "dark:text-teal-300",
+};
+
 export default function StatsSection() {
   const { data: stats, isLoading } = useStats();
   const { data: tasks = [] } = useTasks();
@@ -126,7 +133,7 @@ export default function StatsSection() {
               className="lg:col-span-3 rounded-3xl bg-card p-5 card-glow"
             >
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
                   <TrendingUp className="h-4 w-4" />
                 </span>
                 کارهای انجام‌شده در ۷ روز اخیر
@@ -154,14 +161,19 @@ export default function StatsSection() {
                       tickLine={false}
                     />
                     <Tooltip
-                      cursor={{ fill: "rgba(249,115,22,0.06)" }}
+                      cursor={{ fill: "rgba(249,115,22,0.08)" }}
                       contentStyle={{
                         borderRadius: 16,
-                        border: "1px solid #F5E7D5",
+                        border: "1px solid var(--border)",
+                        backgroundColor: "var(--popover)",
+                        color: "var(--popover-foreground)",
+                        boxShadow: "0 8px 24px -8px rgba(0,0,0,0.25)",
                         fontFamily: "inherit",
                         fontSize: 12,
                         direction: "rtl",
                       }}
+                      itemStyle={{ color: "var(--popover-foreground)" }}
+                      labelStyle={{ color: "var(--popover-foreground)" }}
                       formatter={(v) => [`${faNum(Number(v))} کار`, "انجام‌شده"]}
                     />
                     <Bar dataKey="count" fill="url(#barOrange)" radius={[8, 8, 0, 0]} maxBarSize={44} />
@@ -178,7 +190,7 @@ export default function StatsSection() {
               className="lg:col-span-2 rounded-3xl bg-card p-5 card-glow"
             >
               <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
                   <BarChart3 className="h-4 w-4" />
                 </span>
                 توزیع کارها بر اساس دسته
@@ -207,11 +219,16 @@ export default function StatsSection() {
                         <Tooltip
                           contentStyle={{
                             borderRadius: 16,
-                            border: "1px solid #F5E7D5",
+                            border: "1px solid var(--border)",
+                            backgroundColor: "var(--popover)",
+                            color: "var(--popover-foreground)",
+                            boxShadow: "0 8px 24px -8px rgba(0,0,0,0.25)",
                             fontFamily: "inherit",
                             fontSize: 12,
                             direction: "rtl",
                           }}
+                          itemStyle={{ color: "var(--popover-foreground)" }}
+                          labelStyle={{ color: "var(--popover-foreground)" }}
                           formatter={(v, name) => [`${faNum(Number(v))} کار`, String(name)]}
                         />
                       </PieChart>
@@ -245,7 +262,7 @@ export default function StatsSection() {
               className="rounded-3xl bg-card p-5 card-glow"
             >
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-100 text-red-500">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400">
                   <Trophy className="h-4 w-4" />
                 </span>
                 کارهای ناتمام بر اساس اولویت
@@ -258,7 +275,7 @@ export default function StatsSection() {
                   return (
                     <li key={p.priority}>
                       <div className="mb-1.5 flex items-center justify-between text-xs">
-                        <span className={cn("font-bold", info.color)}>{info.label}</span>
+                        <span className={cn("font-bold", info.color, PRI_TEXT_DARK[p.priority as Priority])}>{info.label}</span>
                         <span className="tabular-nums text-muted-foreground">{faNum(p.pending)} کار</span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
@@ -284,7 +301,7 @@ export default function StatsSection() {
               className="rounded-3xl bg-card p-5 card-glow"
             >
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
                   <Flame className="h-4 w-4" />
                 </span>
                 ثبات عادت‌ها (هفته اخیر)

@@ -70,7 +70,7 @@ export function EmptyState({
   color?: string;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-border/80 px-6 py-10 text-center bg-white/50">
+    <div className="flex flex-col items-center justify-center gap-3 rounded-3xl border-2 border-dashed border-border/80 px-6 py-10 text-center bg-card/60">
       <div
         className="flex h-16 w-16 items-center justify-center rounded-3xl rotate-3"
         style={{ backgroundColor: `${color}1A` }}
@@ -96,7 +96,7 @@ export function ProgressRing({
   size = 72,
   stroke = 8,
   color = "#F97316",
-  track = "#FFEDD5",
+  track = "rgba(127,127,127,0.22)",
   children,
 }: {
   value: number; // 0..100
@@ -199,7 +199,7 @@ export function DeleteConfirm({
             variant="ghost"
             size="icon"
             aria-label={label}
-            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50"
+            className="h-8 w-8 rounded-lg text-muted-foreground hover:text-red-600 hover:bg-red-50 dark:hover:text-red-400 dark:hover:bg-red-500/10"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
@@ -207,7 +207,7 @@ export function DeleteConfirm({
           <Button
             variant="outline"
             size="sm"
-            className="h-8 rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700"
+            className="h-8 rounded-lg text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700 dark:text-red-400 dark:border-red-500/30 dark:hover:bg-red-500/10 dark:hover:text-red-300"
           >
             <Trash2 className="h-3.5 w-3.5" />
             {label}
@@ -264,7 +264,7 @@ export function SectionSkeleton({ count = 3 }: { count?: number }) {
       {Array.from({ length: count }).map((_, i) => (
         <div
           key={i}
-          className="h-20 w-full animate-pulse rounded-2xl bg-white/70"
+          className="h-20 w-full animate-pulse rounded-2xl bg-card/70"
           style={{ animationDelay: `${i * 120}ms` }}
         />
       ))}

@@ -105,7 +105,7 @@ export default function HabitsSection() {
       {habits.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-card p-4 card-glow flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
               <Check className="h-5 w-5" strokeWidth={2.5} />
             </div>
             <div>
@@ -114,7 +114,7 @@ export default function HabitsSection() {
             </div>
           </div>
           <div className="rounded-2xl bg-card p-4 card-glow flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
               <Flame className="h-5 w-5" strokeWidth={2.2} />
             </div>
             <div>
@@ -175,7 +175,7 @@ export default function HabitsSection() {
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm font-extrabold">{habit.title}</p>
                         {streak > 0 && (
-                          <Chip className="bg-orange-100 text-orange-600 shrink-0">
+                          <Chip className="bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300 shrink-0">
                             <Flame className="h-3 w-3" />
                             {faNum(streak)} روز
                           </Chip>
@@ -342,7 +342,7 @@ function HabitDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
               <Repeat className="h-4 w-4" />
             </span>
             {editing ? "ویرایش عادت" : "عادت جدید"}
@@ -381,8 +381,8 @@ function HabitDialog({
                   className={cn(
                     "flex h-10 w-full items-center justify-center rounded-xl border-2 transition-all cursor-pointer",
                     icon === name
-                      ? "border-pink-400 bg-pink-50 text-pink-600 scale-105"
-                      : "border-border text-muted-foreground hover:border-pink-200 hover:text-pink-500"
+                      ? "border-pink-400 bg-pink-50 text-pink-600 scale-105 dark:bg-pink-500/15 dark:text-pink-300"
+                      : "border-border text-muted-foreground hover:border-pink-200 hover:text-pink-500 dark:hover:border-pink-500/40"
                   )}
                 >
                   <I className="h-4.5 w-4.5" />
@@ -411,7 +411,7 @@ function HabitDialog({
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label>هدف هفتگی</Label>
-              <span className="text-xs font-bold text-pink-600">{faNum(target)} روز در هفته</span>
+              <span className="text-xs font-bold text-pink-600 dark:text-pink-300">{faNum(target)} روز در هفته</span>
             </div>
             <Slider
               value={[target]}

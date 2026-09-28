@@ -55,6 +55,20 @@ import { cn } from "@/lib/utils";
 
 type FilterKey = "all" | "today" | "overdue" | "done";
 
+/** نسخه شب چیپ‌های ثابت constants — خوانا در تم شب */
+const CAT_DARK: Record<Category, string> = {
+  WORK: "dark:bg-orange-500/15 dark:text-orange-300",
+  PERSONAL: "dark:bg-pink-500/15 dark:text-pink-300",
+  STUDY: "dark:bg-purple-500/15 dark:text-purple-300",
+  HEALTH: "dark:bg-emerald-500/15 dark:text-emerald-300",
+  OTHER: "dark:bg-teal-500/15 dark:text-teal-300",
+};
+const PRI_DARK: Record<Priority, string> = {
+  HIGH: "dark:bg-red-500/15 dark:text-red-300",
+  MEDIUM: "dark:bg-amber-500/15 dark:text-amber-300",
+  LOW: "dark:bg-teal-500/15 dark:text-teal-300",
+};
+
 const FILTERS: { key: FilterKey; label: string; color?: string }[] = [
   { key: "all", label: "همه" },
   { key: "today", label: "امروز" },
@@ -139,8 +153,8 @@ export default function TasksSection() {
       <div className="rounded-3xl bg-card p-4 sm:p-5 card-glow">
         <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
           <div className="flex items-center gap-3 shrink-0">
-            <ProgressRing value={percent} size={64} stroke={7} color="#14B8A6">
-              <span className="text-xs font-black text-teal-600">{faNum(percent)}٪</span>
+            <ProgressRing value={percent} size={64} stroke={7} color="#14B8A6" track="rgba(20,184,166,0.2)">
+              <span className="text-xs font-black text-teal-600 dark:text-teal-300">{faNum(percent)}٪</span>
             </ProgressRing>
             <div>
               <p className="text-sm font-extrabold">{faNum(doneCount)} از {faNum(tasks.length)} کار انجام شد</p>
@@ -155,7 +169,7 @@ export default function TasksSection() {
                 className={cn(
                   "rounded-full px-3 py-1.5 text-xs font-bold transition-all cursor-pointer border",
                   filter === f.key
-                    ? "bg-teal-500 text-white border-transparent shadow-md shadow-teal-500/25"
+                    ? "bg-teal-500 text-white border-transparent shadow-md shadow-teal-500/25 [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]"
                     : "bg-background text-muted-foreground border-border hover:border-teal-300 hover:text-teal-600"
                 )}
               >
@@ -310,7 +324,7 @@ function TaskCard({
             "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border-2 transition-all cursor-pointer active:scale-90",
             task.completed
               ? "border-transparent bg-gradient-to-br from-teal-400 to-emerald-500 text-white shadow-md shadow-teal-500/30"
-              : "border-teal-300 hover:border-teal-500 hover:bg-teal-50"
+              : "border-teal-300 hover:border-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10"
           )}
         >
           {task.completed && <Check className="h-4 w-4" strokeWidth={3} />}
@@ -331,16 +345,16 @@ function TaskCard({
           )}
 
           <div className="mt-2 flex flex-wrap items-center gap-1.5">
-            <Chip className={cn(category.bg, category.color)}>
+            <Chip className={cn(category.bg, category.color, CAT_DARK[task.category])}>
               <CatIcon className="h-3 w-3" />
               {category.label}
             </Chip>
-            <Chip className={cn(priority.bg, priority.color)}>{priority.label}</Chip>
+            <Chip className={cn(priority.bg, priority.color, PRI_DARK[task.priority])}>{priority.label}</Chip>
             {task.dueDate && (
               <Chip
                 className={cn(
                   "gap-1",
-                  isOverdue ? "bg-red-100 text-red-600" : "bg-muted text-muted-foreground"
+                  isOverdue ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300" : "bg-muted text-muted-foreground"
                 )}
               >
                 <CalendarClock className="h-3 w-3" />
@@ -350,7 +364,7 @@ function TaskCard({
             {task.subtasks.length > 0 && (
               <button
                 onClick={() => setExpanded((v) => !v)}
-                className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-600 hover:bg-purple-100 cursor-pointer transition-colors"
+                className="inline-flex items-center gap-1 rounded-full bg-purple-50 px-2 py-0.5 text-[11px] font-bold text-purple-600 hover:bg-purple-100 cursor-pointer transition-colors dark:bg-purple-500/15 dark:text-purple-300 dark:hover:bg-purple-500/25"
               >
                 زیرکارها {faNum(doneSubs)}/{faNum(task.subtasks.length)}
                 <ChevronDown className={cn("h-3 w-3 transition-transform", expanded && "rotate-180")} />
@@ -496,7 +510,7 @@ function TaskDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
               <ListTodo className="h-4 w-4" />
             </span>
             {task ? "ویرایش کار" : "کار جدید"}
@@ -551,7 +565,7 @@ function TaskDialog({
                   onClick={() => setPriority(p)}
                   className={cn(
                     "rounded-xl border-2 py-2 text-xs font-bold transition-all cursor-pointer",
-                    priority === p ? "border-transparent text-white shadow-md" : "border-border bg-background text-muted-foreground hover:border-foreground/20"
+                    priority === p ? "border-transparent text-white shadow-md [text-shadow:0_1px_2px_rgba(0,0,0,0.35)]" : "border-border bg-background text-muted-foreground hover:border-foreground/20"
                   )}
                   style={priority === p ? { backgroundColor: PRIORITIES[p].dot } : undefined}
                 >

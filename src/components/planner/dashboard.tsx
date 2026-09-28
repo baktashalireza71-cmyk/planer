@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProgressRing, StatCard, Chip } from "./shared";
+import { AdBanner, WelcomeContactCard } from "./ad-banner";
 import { useNow } from "@/hooks/use-clock";
 import { useTasks, useHabits, useEvents, useGoals, useTaskMutations, useHabitMutations } from "@/hooks/use-planner";
 import type { TabKey } from "./app-shell";
@@ -90,6 +91,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
 
   return (
     <div className="space-y-5">
+      {/* ─── کارت خوشامد + بنر تبلیغ (خودشان با isReady گیت می‌شوند) ─── */}
+      <WelcomeContactCard />
+      <AdBanner />
+
       {/* ─── کارت خوش‌آمد ─── */}
       <motion.section
         initial={{ opacity: 0, scale: 0.98 }}
@@ -189,12 +194,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
         >
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
-              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600">
+              <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
                 <ListTodo className="h-4 w-4" />
               </span>
               کارهای امروز
             </h3>
-            <Button variant="ghost" size="sm" onClick={() => onNavigate("tasks")} className="gap-1 text-teal-600 hover:text-teal-700 hover:bg-teal-50 h-8">
+            <Button variant="ghost" size="sm" onClick={() => onNavigate("tasks")} className="gap-1 text-teal-600 dark:text-teal-300 hover:text-teal-700 dark:hover:text-teal-200 hover:bg-teal-50 dark:hover:bg-teal-500/10 h-8">
               همه
               <ChevronLeft className="h-4 w-4" />
             </Button>
@@ -246,12 +251,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
                   <Flame className="h-4 w-4" />
                 </span>
                 عادت‌های امروز
               </h3>
-              <Chip className="bg-pink-50 text-pink-600">
+              <Chip className="bg-pink-50 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
                 {faNum(habitsTodayDone)}/{faNum(habits.length)}
               </Chip>
             </div>
@@ -294,12 +299,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300">
                   <PartyPopper className="h-4 w-4" />
                 </span>
                 رویدادهای پیش‌رو
               </h3>
-              <Button variant="ghost" size="sm" onClick={() => onNavigate("calendar")} className="h-8 text-xs text-purple-600 hover:bg-purple-50 hover:text-purple-700">
+              <Button variant="ghost" size="sm" onClick={() => onNavigate("calendar")} className="h-8 text-xs text-purple-600 dark:text-purple-300 hover:bg-purple-50 dark:hover:bg-purple-500/10 hover:text-purple-700 dark:hover:text-purple-200">
                 تقویم
               </Button>
             </div>
@@ -317,7 +322,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                         {e.time ? ` — ساعت ${faNum(e.time)}` : ""}
                       </p>
                     </div>
-                    <Chip className="bg-purple-50 text-purple-600 shrink-0">
+                    <Chip className="bg-purple-50 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300 shrink-0">
                       {relativeDaysFa(new Date(e.date))}
                     </Chip>
                   </li>
@@ -335,12 +340,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
                   <CalendarHeart className="h-4 w-4" />
                 </span>
                 رویدادهای نزدیک
               </h3>
-              <Button variant="ghost" size="sm" onClick={() => onNavigate("events")} className="h-8 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700">
+              <Button variant="ghost" size="sm" onClick={() => onNavigate("events")} className="h-8 text-xs text-rose-600 dark:text-rose-300 hover:bg-rose-50 dark:hover:bg-rose-500/10 hover:text-rose-700 dark:hover:text-rose-200">
                 همه
               </Button>
             </div>
@@ -367,7 +372,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                         {e.yearly ? " — هر سال" : ""}
                       </p>
                     </div>
-                    <Chip className="shrink-0 bg-rose-50 text-rose-600">
+                    <Chip className="shrink-0 bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
                       {relativeDaysFa(occurrence, now)}
                     </Chip>
                   </li>
@@ -385,12 +390,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
           >
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
-                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
                   <Target className="h-4 w-4" />
                 </span>
                 اهداف فعال
               </h3>
-              <Button variant="ghost" size="sm" onClick={() => onNavigate("goals")} className="h-8 text-xs text-emerald-600 hover:bg-emerald-50 hover:text-emerald-700">
+              <Button variant="ghost" size="sm" onClick={() => onNavigate("goals")} className="h-8 text-xs text-emerald-600 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 hover:text-emerald-700 dark:hover:text-emerald-200">
                 همه
               </Button>
             </div>
@@ -429,9 +434,9 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.28 }}
-        className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/60 px-5 py-4 text-center"
+        className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/60 px-5 py-4 text-center dark:border-orange-500/25 dark:bg-orange-500/10"
       >
-        <p className="text-sm font-bold text-orange-800">«{quote}»</p>
+        <p className="text-sm font-bold text-orange-800 dark:text-orange-200">«{quote}»</p>
       </motion.div>
     </div>
   );
@@ -440,6 +445,20 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
 // ─────────────────────────────────────────────
 //  ردیف کار امروز
 // ─────────────────────────────────────────────
+/** نسخه شب چیپ‌های ثابت constants — خوانا در تم شب */
+const CAT_DARK: Record<string, string> = {
+  WORK: "dark:bg-orange-500/15 dark:text-orange-300",
+  PERSONAL: "dark:bg-pink-500/15 dark:text-pink-300",
+  STUDY: "dark:bg-purple-500/15 dark:text-purple-300",
+  HEALTH: "dark:bg-emerald-500/15 dark:text-emerald-300",
+  OTHER: "dark:bg-teal-500/15 dark:text-teal-300",
+};
+const PRI_DARK: Record<string, string> = {
+  HIGH: "dark:bg-red-500/15 dark:text-red-300",
+  MEDIUM: "dark:bg-amber-500/15 dark:text-amber-300",
+  LOW: "dark:bg-teal-500/15 dark:text-teal-300",
+};
+
 function TodayTaskRow({ task, onToggle }: { task: Task; onToggle: () => void }) {
   const priority = PRIORITIES[task.priority];
   const category = CATEGORIES[task.category];
@@ -463,13 +482,13 @@ function TodayTaskRow({ task, onToggle }: { task: Task; onToggle: () => void }) 
           {task.title}
         </p>
         <div className="mt-1 flex flex-wrap items-center gap-1.5">
-          <Chip className={cn(category.bg, category.color)}>
+          <Chip className={cn(category.bg, category.color, CAT_DARK[task.category])}>
             <CatIcon className="h-3 w-3" />
             {category.label}
           </Chip>
-          <Chip className={cn(priority.bg, priority.color)}>{priority.label}</Chip>
+          <Chip className={cn(priority.bg, priority.color, PRI_DARK[task.priority])}>{priority.label}</Chip>
           {task.dueDate && (
-            <Chip className={cn(isOverdue ? "bg-red-100 text-red-600" : "bg-muted text-muted-foreground")}>
+            <Chip className={cn(isOverdue ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300" : "bg-muted text-muted-foreground")}>
               {relativeDaysFa(new Date(task.dueDate))}
             </Chip>
           )}

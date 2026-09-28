@@ -175,11 +175,11 @@ export default function CalendarSection() {
           className="lg:col-span-2 min-w-0 rounded-3xl bg-card p-3 sm:p-6 card-glow"
         >
           <div className="mb-4 flex items-center justify-between">
-            <Button variant="ghost" size="icon" onClick={() => shiftMonth(-1)} aria-label="ماه قبل" className="rounded-xl hover:bg-purple-50 hover:text-purple-600">
+            <Button variant="ghost" size="icon" onClick={() => shiftMonth(-1)} aria-label="ماه قبل" className="rounded-xl hover:bg-purple-50 dark:hover:bg-purple-500/15 hover:text-purple-600 dark:hover:text-purple-300">
               <ChevronRight className="h-5 w-5" />
             </Button>
             <div className="text-center">
-              <h3 className="text-base sm:text-lg font-black text-purple-700">
+              <h3 className="text-base sm:text-lg font-black text-purple-700 dark:text-purple-300">
                 {JALALI_MONTHS[view.jm - 1]} {faNum(view.jy)}
               </h3>
               <button
@@ -187,12 +187,12 @@ export default function CalendarSection() {
                   setView({ jy: tj.jy, jm: tj.jm });
                   setSelected(today);
                 }}
-                className="text-[11px] font-bold text-muted-foreground hover:text-purple-600 cursor-pointer transition-colors"
+                className="text-[11px] font-bold text-muted-foreground hover:text-purple-600 dark:hover:text-purple-300 cursor-pointer transition-colors"
               >
                 برو به امروز
               </button>
             </div>
-            <Button variant="ghost" size="icon" onClick={() => shiftMonth(1)} aria-label="ماه بعد" className="rounded-xl hover:bg-purple-50 hover:text-purple-600">
+            <Button variant="ghost" size="icon" onClick={() => shiftMonth(1)} aria-label="ماه بعد" className="rounded-xl hover:bg-purple-50 dark:hover:bg-purple-500/15 hover:text-purple-600 dark:hover:text-purple-300">
               <ChevronLeft className="h-5 w-5" />
             </Button>
           </div>
@@ -230,7 +230,7 @@ export default function CalendarSection() {
                   className={cn(
                     "relative flex aspect-square flex-col items-center justify-center rounded-xl text-[13px] sm:text-sm font-bold transition-all cursor-pointer",
                     isSelected && "bg-purple-500 text-white shadow-lg shadow-purple-500/30 scale-[1.04]",
-                    !isSelected && isToday && "bg-orange-100 text-orange-600 ring-2 ring-orange-400",
+                    !isSelected && isToday && "bg-orange-100 text-orange-600 ring-2 ring-orange-400 dark:bg-orange-500/20 dark:text-orange-300 dark:ring-orange-500/50",
                     !isSelected && !isToday && "hover:bg-accent",
                     isPast && !isSelected && "text-muted-foreground/50"
                   )}
@@ -295,13 +295,13 @@ export default function CalendarSection() {
                 <Chip className="bg-muted text-muted-foreground">جمعه</Chip>
               )}
               {sameDay(selected, today) && (
-                <Chip className="bg-orange-100 text-orange-600">امروز</Chip>
+                <Chip className="bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">امروز</Chip>
               )}
             </div>
           </div>
 
           {selectedHoliday && (
-            <div className="mb-4 rounded-2xl border border-red-100 bg-red-50 px-3 py-2.5 text-red-700">
+            <div className="mb-4 rounded-2xl border border-red-500/25 bg-red-500/10 px-3 py-2.5 text-red-600 dark:text-red-400">
               <p className="flex items-center gap-1.5 text-[13px] font-extrabold">
                 <CalendarHeart className="h-4 w-4 shrink-0" />
                 {selectedHoliday.title}
@@ -390,13 +390,13 @@ export default function CalendarSection() {
                   <p className="mb-2 text-xs font-bold text-muted-foreground">کارهای با سررسید این روز</p>
                   <ul className="space-y-2">
                     {selectedTasks.map((t) => (
-                      <li key={t.id} className="flex items-center gap-2 rounded-2xl bg-teal-50/70 border border-teal-100 p-2.5">
-                        <ListTodo className="h-4 w-4 shrink-0 text-teal-600" />
+                      <li key={t.id} className="flex items-center gap-2 rounded-2xl bg-teal-500/10 border border-teal-500/20 p-2.5">
+                        <ListTodo className="h-4 w-4 shrink-0 text-teal-600 dark:text-teal-300" />
                         <span className={cn("truncate text-[13px] font-bold", t.completed && "line-through text-muted-foreground")}>
                           {t.title}
                         </span>
                         {t.completed && (
-                          <Chip className="ms-auto bg-teal-100 text-teal-600 shrink-0">انجام شد</Chip>
+                          <Chip className="ms-auto bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300 shrink-0">انجام شد</Chip>
                         )}
                       </li>
                     ))}
@@ -408,7 +408,7 @@ export default function CalendarSection() {
 
           {/* تعطیلات رسمی پیش‌رو — خارج از بلوک‌های شرطی، همیشه نمایش داده می‌شود */}
           <div className="mt-4 border-t border-dashed border-border pt-3">
-            <p className="mb-2.5 flex items-center gap-1.5 text-[12px] font-extrabold text-red-600">
+            <p className="mb-2.5 flex items-center gap-1.5 text-[12px] font-extrabold text-red-600 dark:text-red-400">
               <CalendarHeart className="h-3.5 w-3.5" />
               تعطیلات پیش‌رو
             </p>
@@ -416,7 +416,7 @@ export default function CalendarSection() {
               {upcoming.map(({ date, holiday }) => (
                 <li
                   key={`${dayKey(date)}-${holiday.title}`}
-                  className="flex items-center gap-2 rounded-xl bg-red-50/60 px-2.5 py-2"
+                  className="flex items-center gap-2 rounded-xl bg-red-500/10 px-2.5 py-2"
                 >
                   <span className="h-2 w-2 shrink-0 rounded-full bg-red-400" aria-hidden />
                   <span className="min-w-0 flex-1 truncate text-[13px] font-bold">
@@ -425,7 +425,7 @@ export default function CalendarSection() {
                   <span className="shrink-0 text-[11px] font-bold text-muted-foreground">
                     {formatJalaliShort(date)}
                   </span>
-                  <Chip className="shrink-0 bg-red-100 text-red-600">
+                  <Chip className="shrink-0 bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300">
                     {relativeDaysFa(date)}
                   </Chip>
                 </li>
@@ -505,7 +505,7 @@ function EventDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300">
               <CalendarDays className="h-4 w-4" />
             </span>
             {editing ? "ویرایش رویداد" : "رویداد جدید"}

@@ -81,6 +81,41 @@ model Note {
 }
 
 // ─────────────────────────────────────────────
+//  تنظیمات مرکزی برنامه (AppSettings) - تک‌ردیفی (id=1)
+//  شامل تبلیغ، کانال ارتباطی و متن خوشامد — فقط فیلدهای عمومی، بدون راز
+// ─────────────────────────────────────────────
+model AppSettings {
+  id             Int      @id @default(1)
+  // نمایش/عدم‌نمایش بنر تبلیغ
+  adsEnabled     Boolean  @default(false)
+  adTitle        String   @default("")
+  adText         String   @default("")
+  adImage        String?  // آدرس تصویر تبلیغ (http/https)
+  adButtonText   String   @default("")
+  adLink         String   @default("") // لینک دکمه تبلیغ (http/https)
+  // کانال ارتباطی: WHATSAPP | TELEGRAM | BALE | NONE
+  contactChannel String   @default("NONE")
+  contactTarget  String   @default("") // شماره واتساپ یا آیدی تلگرام/بله
+  contactMessage String   @default("") // پیام پیش‌فرض هنگام باز شدن چت
+  welcomeText    String   @default("") // متن کارت خوشامد داشبورد
+  // با هر افزایش، کارت خوشامد برای همه کاربران دوباره نمایش داده می‌شود
+  welcomeVersion Int      @default(1)
+  updatedAt      DateTime @updatedAt
+}
+
+// ─────────────────────────────────────────────
+//  اعتبار مدیر (AdminCredential) - تک‌ردیفی (id=1)
+//  رمز هش‌شده scrypt + وضعیت قفل ضدحمله (هرگز از API عمومی برنمی‌گردد)
+// ─────────────────────────────────────────────
+model AdminCredential {
+  id             Int       @id @default(1)
+  passwordHash   String    // قالب "scrypt:<salt>:<hash>"
+  failedAttempts Int       @default(0) // تعداد تلاش‌های ناموفق فعلی
+  lockedUntil    DateTime? // اگر در آینده باشد، ورود موقتاً قفل است
+  updatedAt      DateTime  @updatedAt
+}
+
+// ─────────────────────────────────────────────
 //  رویدادها (Events) - تقویم + رویدادهای ویژه (تولد، سالگرد و ...)
 // ─────────────────────────────────────────────
 model Event {

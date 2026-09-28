@@ -1,0 +1,198 @@
+   180→Task: ترتیب درست هفته در شبکه عادت‌ها (ش ی د س چ پ ج از راست) + غیرفعال‌سازی روزهای آینده + رفع سرریز موبایل ۲۶۷px
+   181→
+   182→Work Log:
+   183→- خواندن worklog.md، habits-section.tsx و lib/date.ts قبل از هر تغییری (مطابق روال اجباری)
+   184→- جایگزینی last7Days با currentWeekDays: هفته جاری ایران از شنبه تا جمعه (sat = today - persianWeekday(today) و سپس ۷ روز) — آرایه از شنبه شروع می‌شود و چون کانتینر RTL است، اولین فرزند راست‌ترین است → ترتیب رندر از راست: ش ی د س چ پ ج
+   185→- weekDone فقط روزهای لاگ‌شده تا امروز (شامل امروز) از weekDays شمرده می‌شود: dayKey(d) <= todayKeyStr (مقایسه رشته‌ای کلید YYYY-MM-DD)؛ منطق weekPct و استریک دست‌نخورده ماند
+   186→- روزهای آینده: disabled + opacity-40 + cursor-default، حذف active:scale-90، aria-label «X — روز آینده»؛ تیک‌زدن گذشته‌های همین هفته و امروز همچنان فعال (endpoint از قبل هر تاریخی را ساپورت می‌کند)
+   187→- افزودن عدد روز شمسی با رقم فارسی زیر هر دایره: faNum(toJalali(d).jd) با text-[9px] tabular-nums (حرف بالا، دایره وسط، عدد پایین) و فشرده‌سازی gap داخلی ستون به gap-0.5
+   188→- رفع سرریز موبایل: کارت عادت p-3 sm:p-5، ردیف گرید gap-0.5 sm:gap-1، دایره h-7 w-7 sm:h-8 sm:w-8، آیکون تیک h-3.5 w-3.5 sm:h-4 sm:w-4 — عرض محاسبه‌شده در ۲۶۷px از ۲۸۰px به ۲۳۲px رسید
+   189→- بررسی عناصر تزئینی absolute: در habits-section.tsx هیچ عنصر position:absolute وجود ندارد (grep تأیید کرد؛ موارد -left در dashboard/notes و... خارج از محدوده) — سرریز ۱۳px صرفاً از اندازه ثابت دایره‌ها + پدینگ کارت بود و با سایز ریسپانسیو حل شد
+   190→- حین تست کشف شد dev server مرده بود (ERR_CONNECTION_REFUSED، بدون خطای کامپایل در dev.log — kill خارجی)؛ برای تأیید اجباری مرورگر، سرور با bun run dev جدا از این اسکریپت دوباره بالا آمد (build اجرا نشد)
+   191→- تأیید مرورگر (agent-browser 390×844): حروف DOM از اول به آخر = ش ی د س چ پ ج (اولین فرزند راست‌ترین)، عددهای شمسی ۴-۱۰، س/چ/پ/ج disabled با «روز آینده»، ش/ی/د فعال، دکمه امروز کلیک‌پذیر
+   192→- تأیید ۲۶۷×۶۰۰: document.documentElement.scrollWidth === 267 === innerWidth (قبلاً ۲۸۰)؛ اسکرین‌شات /tmp/habits-267.png
+   193→- تست toggle: تیک امروز یک‌بار زده و یک‌بار برداشته شد و در پایان به وضعیت اولیه (انجام‌شده) برگردانده شد — بدون ساخت عادت تستی (یک عادت واقعی از قبل موجود بود) و بدون حذف هیچ داده‌ای
+   194→- bun run lint: بدون خطا/هشدار؛ npx tsc --noEmit: فقط خطاهای قدیمی examples/ و skills/ — صفر خطای جدید
+   195→
+   196→Stage Summary:
+   197→- شبکه هفتگی عادت‌ها اکنون هفته جاری ایران را از راست به چپ نشان می‌دهد: ش ی د س چ پ ج (شنبه راست، جمعه چپ) + عدد روز شمسی زیر هر دایره
+   198→- روزهای آینده غیرقابل تیک‌اند (disabled + کم‌رنگ + aria «روز آینده»)؛ امروز و گذشته‌های همین هفته فعال‌اند
+   199→- سرریز افقی در ویوپورت ۲۶۷px صفر شد (scrollWidth = 267) با سایزهای ریسپانسیو sm:
+   200→- تنها فایل تغییرکرده: src/components/planner/habits-section.tsx
+   201→
+   202→---
+   203→Task ID: 4-a
+   204→Agent: general-purpose
+   205→Task: بخش اختصاصی «رویدادها» برای رویدادهای ویژه زندگی (تولد/سالگرد/قرار ملاقات/یادبود/شخصی) با تکرار سالانه شمسی
+   206→
+   207→Work Log:
+   208→- prisma/schema.prisma: افزودن type (String, default CUSTOM)، yearly (Boolean, default false)، birthYear (Int?) به مدل Event و اجرای `bun run db:push` (کلاینت دوباره تولید شد)
+   209→- ری‌استارت dev server طبق روال (pkill + nohup bun run dev)؛ GET /api/events اکنون type/yearly/birthYear را برمی‌گرداند و 200 است
+   210→- API: POST /api/events اعتبارسنجی type (یکی از ۵ کلید، پیش‌فرض CUSTOM)، yearly (boolean) و birthYear (int یا null) با همان سبک helpers (isOneOf/isInt) و پیام‌های خطای انگلیسی قبلی؛ PATCH /api/events/[id] همان فیلدها به‌صورت اختیاری (فقط فیلدهای ارسالی)
+   211→- src/lib/constants.ts: افزودن EventType، EVENT_TYPES (برچسب/آیکون Cake, Heart, CalendarClock, Flower2, Star + رنگ و bg)، EVENT_TYPE_LIST و گسترش PlannerEvent با type/yearly/birthYear
+   212→- src/lib/api-client.ts: EventInput با type?/yearly?/birthYear? گسترش یافت؛ src/hooks/use-planner.ts: نوع پارامتر update رویدادها به‌روز شد
+   213→- src/lib/date.ts: دو هلپر با کامنت فارسی — nextOccurrenceDate(eventDate, yearly, today) (رخداد بعدی بر اساس ماه/روز شمسی، ساعت ۱۲ ظهر، «امروز» جزو آینده، مهار روز نامعتبر مثل ۳۰ اسفند در سال غیرکبیسه با jalaliMonthLength) و jalaliAge(birthYear, today)
+   214→- src/components/planner/events-section.tsx (جدید): SectionHeader (CalendarHeart، #F43F5E، دکمه گرادیانی از-rose به-pink «رویداد جدید»)؛ دو کارت خلاصه (نزدیک‌ترین رویداد + «X تولد ثبت شده» با Cake)؛ چیپ‌های فیلتر همه/پیش‌رو (۳۰ روز)/تولدها؛ کارت‌های motion.li با آیکون نوع در مربع رنگی، چیپ «هر سال» (Repeat)، «X ساله می‌شود» (jalaliAge)، «ساعت X»، تاریخ شمسی formatJalaliMedium + چیپ شمارش معکوس (امروز سبز / X روز مانده نارنجی / گذشته خاکستری + opacity-70)؛ مرتب‌سازی بر اساس رخداد بعدی (گذشته‌های یک‌باره در انتها)؛ EmptyState (Cake، «ثبت اولین رویداد»)؛ EventDialog با ترفند wasOpen: ۵ دکمه قرصی نوع (grid-cols-3 sm:grid-cols-5)، عنوان، JalaliDatePicker قابل پاک‌کردن، Switch «هر سال تکرار شود» با متن راهنما، فیلد شرطی «سال تولد (شمسی)» با تبدیل ارقام فارسی→لاتین (faToEn)، ساعت، یادداشت، دات‌های رنگ (پیش‌فرض CHEERFUL_COLORS[4])؛ toast های فارسی
+   215→- app-shell.tsx: افزودن "events" به TabKey و NAV_ITEMS (بعد از تقویم، shortLabel «رویداد»، CalendarHeart، #F43F5E)، رندر EventsSection، import — تغییرات موبایلِ اکشن اصلی دست‌نخورده ماند (کامنت نویگیشن پایین همان «۸ آیتم» ماند چون حالا ۸ آیتم داریم)
+   216→- calendar-section.tsx: eventsByDay اکنون رویدادهای yearly=true را به همان روز شمسیِ ماهِ نمای جاری نگاشت می‌کند (بدون درج تکراری؛ مهار روز نامعتبر) — پنل روز و دات‌ها خودکار شامل رخداد سالانه می‌شوند؛ بقیه کلاس‌ها/تغییرات اکشن اصلی حفظ شد
+   217→- dashboard.tsx: کارت فشرده «رویدادهای نزدیک» (CalendarHeart، rose) بعد از اهداف فعال در ستون کناری — تا ۳ رویداد مرتب بر اساس nextOccurrenceDate (سالانه‌ها لحاظ می‌شوند) با دات رنگ رویداد، عنوان truncate، چیپ relativeDaysFa، تاریخ formatJalaliShort + «— هر سال»؛ حالت خالی «رویداد مهمی ثبت نشده» کلیک‌پذیر → onNavigate("events")؛ min-w-0/truncate برای عدم سرریز در ۳۲۰-۳۹۰px
+   218→- راستی‌آزمایی مرورگر (agent-browser، 390x844، ۴ دور): ساخت «تولد سارا» از UI (نوع تولد، yearly، سال تولد ۱۳۷۰ با ارقام فارسی، ۱۵ آبان، رنگ صورتی) → کارت با «هر سال»، «۳۵ ساله می‌شود»، «۱۵ آبان ۱۴۰۵»، «۳۹ روز مانده» ✓؛ تقویم یک ماه جلو رفت → دات صورتی روی ۱۵ آبان و نمایش رویداد در پنل روز ✓؛ داشبورد کارت «رویدادهای نزدیک» با همان رویداد ✓ (scrollWidth=390، بدون سرریز)؛ فیلترها ✓ (تولدها=۱، پیش‌رو=۰ چون ۳۹>۳۰ روز)؛ ویرایش: پیش‌فرض دیالوگ کامل (عنوان/سویچ true/«۱۳۷۰» فارسی/تاریخ/ساعت/یادداشت) و ذخیره ویرایش با حفظ type/yearly/birthYear در PATCH ✓؛ حذف با تأیید و پاک‌سازی کامل رویداد تست (فقط رویداد قبلی جلسه تمرین باقی ماند) ✓
+   219→- `bun run lint` پاک؛ `npx tsc --noEmit` فقط ۴ خطای قدیمی examples/ و skills/ — صفر خطای جدید در src/؛ `agent-browser errors` خالی
+   220→
+   221→Stage Summary:
+   222→- بخش «رویدادها» کامل و متصل شد: تب هشتم ناوبری (سایدبار + باتم‌ناو موبایل)، CRUD کامل با نوع رویداد، تکرار سالانه شمسی و سن شمسی
+   223→- مدل داده Event: type(BIRTHDAY|ANNIVERSARY|APPOINTMENT|MEMORIAL|CUSTOM), yearly, birthYear — API اعتبارسنجی می‌کند و UI همه را می‌سازد/ویرایش می‌کند
+   224→- nextOccurrenceDate/jalaliAge در src/lib/date.ts برای استفاده مجدد (مثلاً نوتیفیکیشن‌های آینده) آماده‌اند
+   225→- تقویم رخدادهای سالانه را در هر سال نمایش می‌دهد (نگاشت به همان ماه/روز شمسی) و داشبورد کارت «رویدادهای نزدیک» دارد
+   226→- نکته: هشدار قدیمی Radix «AlertDialogContent requires a description» هنگام باز شدن DeleteConfirm (shared.tsx، خارج از محدوده فایل‌های این تسک) در کنسول دیده می‌شود — قبلاً هم موجود بود و ربطی به این تغییرات ندارد
+   227→
+   228→---
+   229→Task ID: 4
+   230→Agent: main (Z.ai Code) + subagents 4-a/4-b
+   231→Task: رفع نمایش تقویم در موبایل، اصلاح ترتیب روزهای هفته عادت‌ها (ش ی د س چ پ ج)، و افزودن بخش رویدادها (تولد/سالگرد)
+   232→
+   233→Work Log:
+   234→- عیب‌یابی ریشه‌ای سرریز افقی تقویم با agent-browser در عرض ۲۶۷px: آیتم‌های گرید (sectionها) به‌خاطر min-width:auto کوچک نمی‌شدند؛ زنجیره truncate/nowrap داخل «تعطیلات پیش‌رو» min-content را ۳۸۶px می‌کرد (۲۱۹px برش در سمت چپ در RTL)
+   235→- Fix (calendar-section.tsx): افزودن min-w-0 به هر دو section و کانتینر گرید، p-3 در موبایل برای کارت ماه، text-[13px] sm:text-sm برای اعداد روزها، truncate برای عنوان پنل روز
+   236→- Fix (app-shell.tsx): هدر موبایل flex-wrap با min-w-0 (چیپ‌ها در عرض‌های خیلی باریک می‌شکنند نه اینکه بیرون بزنند)، نویگیشن پایین بازنویسی شد: flex-1 + min-w-0 + برچسب کوتاه (shortLabel) برای ۸ آیتم — دیگر هیچ‌وقت سرریز/اسکرول ندارد؛ فیلد shortLabel به NAV_ITEMS اضافه شد
+   237→- زیرعامل 4-a — بخش «رویدادها»: Event در اسکیما + type (BIRTHDAY/ANNIVERSARY/APPOINTMENT/MEMORIAL/CUSTOM) + yearly + birthYear؛ db:push و ری‌استارت سرور؛ APIهای POST/PATCH فیلدهای جدید را اعتبارسنجی می‌کنند؛ EVENT_TYPES در constants (آیکون‌های Cake/Heart/CalendarClock/Flower2/Star)؛ هلپرهای nextOccurrenceDate (رخداد بعدی بر اساس ماه/روز شمسی) و jalaliAge در lib/date؛ events-section.tsx جدید: کارت خلاصه (نزدیک‌ترین رویداد + تعداد تولدها)، فیلتر همه/پیش‌رو/تولدها، کارت‌ها با چیپ «هر سال»/«X ساله می‌شود»/شمارش معکوس، دیالوگ کامل با نوع رویداد، سوئیچ تکرار سالانه، ورودی مشروط «سال تولد (شمسی)»؛ تب هشتم «رویداد» در نویگیشن موبایل و سایدبار؛ تقویم حالا رویدادهای سالانه را روی همان ماه/روز شمسیِ ماهِ در حال نمایش نشان می‌دهد؛ داشبورد دو کارت «رویدادهای پیش‌رو» و «رویدادهای نزدیک» گرفت
+   238→- زیرعامل 4-b — عادت‌ها: last7Days → currentWeekDays (شنبه تا جمعهٔ هفته جاری)؛ در RTL اولین آیتم راست‌ترین است ⇒ ترتیب از راست: ش ی د س چ پ ج (تأیید DOM)؛ روزهای آینده disabled + opacity-40؛ عدد روز شمسی زیر هر دایره؛ سایز موبایل: کارت p-3، دایره‌ها h-7 w-7، gap-0.5 ⇒ رفع سرریز ۲۸۰px
+   239→- راستی‌آزمایی نهایی با agent-browser: اسکن سرریز در ۸ تب × ۳ عرض (۲۶۷/۳۲۰/۳۹۰) = صفر سرریز در همه؛ چرخه کامل رویداد: ساخت «تولد سارا» (سالانه، متولد ۱۳۷۰) ⇒ کارت با «۳۵ ساله می‌شود»، نقطه روی ۱۵ آبان در تقویم، پنل روز، هر دو کارت داشبورد ✓ سپس حذف؛ ترتیب هفته عادت = ش،ی،د،س،چ،پ،ج؛ دسکتاپ ۱۲۸۰px: سایدبار با رویدادها، ساعت زنده، فوتر پایین چسبیده؛ lint و tsc بدون خطای جدید؛ کنسول مرورگر پاک
+   240→
+   241→Stage Summary:
+   242→- هر ۳ مشکل کاربر حل و مرورگر-تأیید شد: (۱) تقویم در همه عرض‌های موبایل کامل نمایش داده می‌شود، (۲) ترتیب هفته عادت‌ها از راست ش ی د س چ پ ج، (۳) بخش مستقل «رویدادها» با تولد/سالگرد، تکرار سالانه شمسی، محاسبه سن و شمارش معکوس
+   243→- اپ اکنون ۸ بخش دارد؛ نویگیشن پایین موبایل همیشه ۸ آیتم را بدون اسکرول جا می‌دهد
+   244→- نکته برای آینده: الگوی `flex-1 min-w-0 truncate` در زنجیره‌های گرید/فلکس کافی نیست — آیتمِ گرید ریشه هم min-w-0 می‌خواهد
+   245→
+   246→---
+   247→Task ID: 5-a
+   248→Agent: main (Z.ai Code)
+   249→Task: پایه سیستم ۴ تم + کانتکست تنظیمات مرکزی برنامه (پیش‌نیاز تسک‌های 5-b/5-c/5-d)
+   250→
+   251→Work Log:
+   252→- globals.css: افزودن سه پالت کامل [data-theme="emerald"] (سبز تیل مردانه)، [data-theme="night"] (تاریک بنفش‌فام) و [data-theme="sunset"] (کهربایی گرم) — :root همان تم blossom (شکوفه) قبلی است
+   253→- custom-variant dark از (.dark *) به ([data-theme="night"] *) تغییر کرد تا تمام dark: variant های shadcn در تم شب فعال شوند؛ بلوک قدیمی .dark حذف شد
+   254→- اسکرول‌بار گرادیانی حالا با var(--primary)/var(--chart-3) تم‌آگاه شد؛ transition نرم پس‌زمینه بین تم‌ها
+   255→- src/lib/themes.ts: متادیتای ۴ تم (id/name/desc/swatch) + THEME_IDS + DEFAULT_THEME برای next-themes
+   256→- src/lib/app-config-context.tsx: AppConfigProvider با کش localStorage (کلیدهای planner.app-config.cache.v1 و planner.welcome.seen-version)، refresh() برای واکشی /api/app-config، dismissWelcome() و buildContactUrl برای لینک عمیق سه کانال
+   257→- providers.tsx: ThemeProvider (attribute="data-theme"، defaultTheme="blossom"، enableSystem=false) + AppConfigProvider
+   258→- bun run lint پاس (بدون خطا)
+   259→
+   260→Stage Summary:
+   261→- قرارداد برای تسک‌های بعدی (حتماً از این قراردادها منحرف نشوید):
+   262→  1) تم‌ها فقط با data-theme روی html کار می‌کنند: blossom|emerald|night|sunset — کامپوننت‌ها باید تا جای ممکن رنگ معنایی (bg-card، text-muted-foreground، bg-secondary و...) استفاده کنند؛ تم night باید در همه بخش‌ها خوانا باشد
+   263→  2) useAppConfig(): {config: AppConfig, isReady, refresh, seenWelcomeVersion, dismissWelcome} — برای بنر تبلیغ/کارت خوشامد/بخش پشتیبانی تنظیمات؛ بعد از ذخیره پنل مدیر حتماً refresh() صدا زده شود
+   264→  3) ماه تولد کاربر برای فال: localStorage key = "planner.fal.birth-month" (مقدار "1" تا "12") + dispatch رویداد CustomEvent("planner:birth-month-changed") در تغییر — fal-section به این رویداد و storage event گوش می‌دهد
+   265→  4) API عمومی: GET /api/app-config → {config: AppConfig} (همان فیلدهای DEFAULT_CONFIG) — هیچ فیلد حساسی برگردانده نمی‌شود
+   266→  5) API مدیر: POST /api/admin/login {password} (کوکی httpOnly planner_admin) ، POST /api/admin/logout ، GET/PUT /api/admin/settings ، PUT /api/admin/password {currentPassword,newPassword} — بدون سشن 401
+   267→  6) مدل دیتابیس AppSettings(id=1) و AdminCredential(id=1) با seed خودکار؛ رمز پیش‌فرض مدیر: admin1404 (تغییرپذیر از پنل)
+   268→
+   269→---
+   270→Task ID: 5-c
+   271→Agent: general-purpose
+   272→Task: بک‌اند تنظیمات مرکزی + تبلیغ + پنل مدیر (schema، security، ۵ API، هدرهای امنیتی)
+   273→
+   274→Work Log:
+   275→- خواندن اجباری worklog.md (به‌خصوص قرارداد 5-a) و فایل‌های مرجع: prisma/schema.prisma، api/events/route.ts، api/_lib/helpers.ts، lib/db.ts، next.config.ts و app-config-context.tsx
+   276→- prisma/schema.prisma: افزودن دو مدل تک‌ردیفی با همان سبک کامنت فارسی — AppSettings (id=1؛ adsEnabled/adTitle/adText/adImage/adButtonText/adLink/contactChannel/contactTarget/contactMessage/welcomeText/welcomeVersion/updatedAt با default های دقیق قرارداد) و AdminCredential (id=1؛ passwordHash با قالب "scrypt:<salt>:<hash>" + failedAttempts + lockedUntil)؛ اجرای `bun run db:push` موفق و Prisma Client v6.19.2 تولید شد
+   277→- src/lib/security.ts (فقط crypto داخلی Node، بدون وابستگی جدید): hashPassword (salt تصادفی ۱۶ بایتی hex + scryptSync(pw, salt, 64) → "scrypt:<salt>:<hash>")، verifyPassword با timingSafeEqual (رمزگشایی طول هش ذخیره‌شده برای جلوگیری از پرتاب خطای طول نامساوی)، createSessionToken (payload {exp: now+24h} → base64url.payload.base64url(HMAC-SHA256(secret,payload))؛ secret = process.env.ADMIN_SESSION_SECRET ?? "planner-local-secret-change-in-production")، verifySessionToken (امضا با timingSafeEqual + چک exp)، ADMIN_COOKIE_NAME="planner_admin"، و rate limiter حافظه‌ای Map با پاک‌سازی دوره‌ای unref-شده: registerAdminFailure(key) → بعد ۵ خطا در پنجره ۱۵ دقیقه‌ای قفل تا پایان همان پنجره {locked, retryAfterSec}، isAdminRateLocked(key) برای چک قبل از پردازش، clearAdminFailures(key)
+   278→- src/app/api/_lib/app-settings.ts: ensureAppSettings (upsert ردیف id=1 با default های اسکیما)، ensureAdminCredential (ساخت با hashPassword(process.env.ADMIN_PASSWORD ?? "admin1404") + هندل مسابقه همزمان با catch/re-read)، toPublicConfig (فقط ۱۱ فیلد عمومی — هیچ رازی عبور نمی‌کند) و toAdminSettings (همان + updatedAt ISO)
+   279→- src/app/api/_lib/admin-session.ts: isAdminAuthenticated() — خواندن کوکی planner_admin و verifySessionToken (نیازمند سشن برای route های ادمین)
+   280→- پنج route مطابق سبک کدبیس (همه با export const dynamic="force-dynamic"، try/catch، خطای {error} با jsonError helpers، پیام‌های خطای انگلیسی):
+   281→  • GET /api/app-config: عمومی، ensureAppSettings + toPublicConfig، هدر Cache-Control: no-store
+   282→  • POST /api/admin/login: key ضدحمله از x-forwarded-for (اولین IP) یا "local"؛ چک قفل DB (lockedUntil) سپس قفل حافظه‌ای → 429 {error:"Too many failed attempts", retryAfterSec}؛ body بدون password → 400؛ رمز >۱۲۸ کاراکتر بدون هش رد می‌شود (ضد DoS scrypt)؛ verifyPassword → ناموفق: registerAdminFailure + failedAttempts+1 در DB (و در خطای پنجم lockedUntil پایدار در DB) و 401 {error:"Invalid password"}؛ موفق: failedAttempts=0، lockedUntil=null، clearAdminFailures، کوکی await cookies().set با {httpOnly:true, sameSite:"strict", path:"/", maxAge:86400, secure:false} (کامنت: در تولید روی HTTPS باید secure:true شود) و {ok:true}
+   283→  • POST /api/admin/logout: باطل‌سازی کوکی با set مقدار خالی maxAge:0 → {ok:true}
+   284→  • GET/PUT /api/admin/settings: هر دو با چک سشن → 401 {error:"unauthorized"}؛ PUT ذخیره کامل با اعتبارسنجی سخت‌گیرانه: adsEnabled boolean؛ contactChannel از چهار مقدار؛ طول‌ها: adTitle≤120، adText≤500، adButtonText≤40، adLink≤500، contactTarget≤100، contactMessage≤300، welcomeText≤1000، adImage≤500؛ adImage رشته یا null؛ adLink/adImage غیرخالی باید ^https?:\/\/ (جلوی javascript:/data:)؛ contactTarget طبق کانال — WHATSAPP: ^\+?\d{6,20}$، TELEGRAM/BALE: ^[A-Za-z0-9_]{3,64}$، NONE: فقط رشته خالی؛ welcomeVersion عدد صحیح ۱..۱۰۰۰۰۰۰؛ آپدیت ردیف id=1 و خروجی {settings} با no-store
+   285→  • PUT /api/admin/password: سشن لازم؛ currentPassword غلط → 400؛ newPassword ۸..۶۴ کاراکتر (و سقف ۱۲۸ ضد DoS)؛ hashPassword جدید + failedAttempts=0 + lockedUntil=null → {ok:true}
+   286→- next.config.ts: headers() با source "/:path*" اعمال ۴ هدر امنیتی روی همه مسیرها — X-Content-Type-Options:nosniff، X-Frame-Options:DENY، Referrer-Policy:strict-origin-when-cross-origin، Permissions-Policy:camera=(), microphone=(), geolocation=() (کامنت: CSP عمداً نه، dev را می‌شکند)
+   287→- تست کامل با curl (اسکریپت یک‌جا + ری‌استارت سرور بعد از db:push با pkill + setsid nohup next dev؛ توجه: dev server در این محیط بین فراخوانی‌ها kill خارجی می‌شود — راه‌حل پایدار: اجرای مستقیم باینری next با setsid و لاگ به dev.log):
+   288→  ✓ GET /api/app-config → 200 با دقیقاً default های قرارداد + cache-control: no-store
+   289→  ✓ هدرهای امنیتی روی / هر ۴ مورد حاضر
+   290→  ✓ login بدون password → 400؛ ۵ بار رمز غلط → هر ۵ بار 401؛ تلاش ششم → 429 {error, retryAfterSec:900}
+   291→  ✓ پاک‌سازی قفل DB (فقط هارنس تست) + ری‌استارت سرور (پاک شدن rate limiter حافظه‌ای) → login با admin1404 → 200 {ok:true} و کوکی planner_admin با HttpOnly/SameSite=strict/Path=/ /Max-Age=86400
+   292→  ✓ GET settings با کوکی 200 (شامل updatedAt)؛ بدون کوکی 401
+   293→  ✓ PUT settings معتبر (adsEnabled=true، کانال TELEGRAM با آیدی معتبر، welcomeVersion=2) → 200؛ GET /api/app-config بعدش دقیقاً همان مقادیر را نشان داد
+   294→  ✓ PUT بدون کوکی → 401؛ PUT با adLink="javascript:alert(1)" → 400؛ ناهمخوانی کانال/هدف (TELEGRAM + شماره) → 400؛ welcomeText ۱۰۰۱ کاراکتری → 400
+   295→  ✓ PUT password با current غلط → 400؛ newPassword کوتاه → 400؛ تغییر admin1404→TestPass1234 → 200؛ login با رمز جدید 200 و رمز قدیم 401
+   296→  ✓ logout → 200 + Set-Cookie: planner_admin=; Max-Age=0 و بعدش GET settings → 401
+   297→  ✓ بازگرداندن همه‌چیز به حالت اول: settings پیش‌فرض (adsEnabled=false، متن‌ها خالی، کانال NONE، welcomeVersion=1)، password به admin1404 (PUT با current=TestPass1234)؛ تأیید نهایی DB: AppSettings پیش‌فرض + AdminCredential failedAttempts=0، lockedUntil=null، هش scrypt؛ app-config نهایی = پیش‌فرض
+   298→  ✓ dev.log بعد از کل سناریو: صفر خطای ران‌تایم
+   299→- `bun run lint` بدون هیچ خطا/هشدار؛ `npx tsc --noEmit` فقط ۴ خطای قدیمی examples/ و skills/ (مستند در Task 2-a) — صفر خطا در src (یک خطای تایپ welcomeVersion در اولین اجرا پیدا و با استخراج const رفع شد)
+   300→
+   301→Stage Summary:
+   302→- قرارداد نهایی APIها (دقیقاً مطابق 5-a، هیچ انحرافی ندارد):
+   303→  • GET /api/app-config → 200 {config:{adsEnabled,adTitle,adText,adImage,adButtonText,adLink,contactChannel,contactTarget,contactMessage,welcomeText,welcomeVersion}} + Cache-Control:no-store (عمومی، بدون فیلد حساس)
+   304→  • POST /api/admin/login {password} → موفق {ok:true} + کوکی httpOnly "planner_admin" (SameSite=strict، ۲۴ ساعت)؛ رمز غلط 401 {error:"Invalid password"}؛ قفل 429 {error:"Too many failed attempts", retryAfterSec}
+   305→  • POST /api/admin/logout → {ok:true} (کوکی Max-Age=0)
+   306→  • GET/PUT /api/admin/settings → {settings} (PUT ذخیره کامل است؛ همه فیلدها الزامی؛ اعتبارسنجی مطابق جدول بالا؛ بدون سشن 401 {error:"unauthorized"})
+   307→  • PUT /api/admin/password {currentPassword,newPassword} → {ok:true} (رمز جدید ۸..۶۴)
+   308→- مدل‌های دیتابیس: AppSettings(id=1) و AdminCredential(id=1) با seed خودکار در اولین درخواست (بدون فایل seed جدا)؛ رمز پیش‌فرض مدیر: "admin1404" (از env ADMIN_PASSWORD در صورت وجود)؛ هش scrypt با salt تصادفی
+   309→- ضدحمله دو لایه: rate limiter حافظه‌ای (۵ خطا/۱۵ دقیقه → قفل تا پایان پنجره) + قفل پایدار در DB (lockedUntil که حتی با ری‌استارت سرور می‌ماند)؛ تغییر موفق رمز قفل را هم صفر می‌کند
+   310→- فرانت‌اند (5-b/5-d) بعد از ذخیره پنل مدیر باید refresh() کانکست را صدا بزند؛ خروجی PUT settings همان شیئی است که GET settings می‌دهد (+updatedAt)
+   311→- یادآوری استقرار واقعی: حتماً ADMIN_SESSION_SECRET را در env بگذار (وگرنه secret پیش‌فرض dev استفاده می‌شود) و کوکی را با secure:true روی HTTPS سرو کن؛ در صورت تمایل ADMIN_PASSWORD را هم قبل از اولین اجرا ست کن
+   312→
+   313→---
+   314→Task ID: 5-b
+   315→Agent: general-purpose
+   316→Task: بانک فال ۱۲ برج شمسی + مبدل سه‌طرفه (شمسی/میلادی/قمری) + محاسبه تولد
+   317→
+   318→Work Log:
+   319→- خواندن اجباری worklog.md (قراردادهای 5-a برای تم‌ها و کلید planner.fal.birth-month)، lib/date.ts، lib/constants.ts، events-section.tsx، shared.tsx و jalali-date-picker.tsx قبل از شروع
+   320→- src/lib/fal.ts: نوع MonthFal + رکورد کامل ۱۲ ماه (حمل تا حوت با symbol ♈-♓، ایموجی‌های 🐏🐮👥🦀🦁🌾⚖️🦂🏹🐐🏺🐟، رنگ hex اختصاصی و ۴ ویژگی) — مجموع دقیقاً ۱۹۲ متن فال (۱۶ برای هر برج) با لحن گرم مجله‌ای، موضوعات متنوع (فرصت/عشق/کار/سلامت/پول/خانواده/سفر/هشدار ملایم/انگیزه) و حس اختصاصی هر برج (اسد=اعتمادبه‌نفس، حوت=خیال و مهربانی و...)؛ همه متن‌ها unique (تست شد) و بدون هیچ تاریخ میلادی
+   321→- getFalOfTheDay(jy,jm,jd): هش قطعی h = jy*372+(jm-1)*31+jd → index = h % 16 (پایدار در طول روز)، luckyNumber = 1+(h%99)، luckyColor از LUCKY_COLORS (۹ رنگ {name,hex}: قرمز/نارنجی/زرد/سبز/فیروزه‌ای/بنفش/صورتی/طلایی/سفید) با هش قطعی — تست قطعیت و بازه 1..99 پاس
+   322→- getChineseZodiac(jy): gy=jy+621، idx=((gy-4)%12+12)%12 روی ۱۲ حیوان — صحت‌سنجی: ۱۳۷۰→گوسفند🐑، ۱۴۰۳→اژدها🐉، ۱۴۰۴→مار🐍 ✓
+   323→- jalaliAgeParts با قرض‌گیری درست: کسری روز از طول ماه قبلِ «امروز» (jalaliMonthLength) سپس کسری ماه — تست: ۱۵آبان۱۳۷۰→۱۰مهر۱۴۰۴ = ۳۳سال/۱۰ماه/۲۶روز، ۳۱فروردین→۱اردیبهشت = ۰/۰/۱، همان‌روز = ۰/۰/۰ ✓
+   324→- daysUntilNextJalaliBirthday: رخداد بعدی همان ماه/روز شمسی؛ روز ۳۰ اسفند در سال غیرکبیسه با clamp روی jalaliMonthLength مهار می‌شود — تست: امروز=۰، ۱۵آبان از ۱۰مهر=۳۵، ۳۰اسفند از ۱فروردین۱۴۰۴=۳۶۴ (مقصد ۲۹اسفند)، ۳۰اسفند از ۲۹اسفند۱۴۰۳(کبیسه)=۱ ✓
+   325→- src/lib/hijri.ts: HIJRI_MONTHS فارسی + سازنده Intl.DateTimeFormat("en-u-ca-islamic-umalqura") یک‌بار در ماژول؛ toHijri با formatToParts (پارس بر اساس type نه ترتیب اجزا)؛ fromHijri با تخمین اولیه بر پایه فرمول hy*0.970224+621.57 (سال کسری + جابه‌جایی ماه/روز قمری با ۲۹.۵۳ روز/ماه) و جستجوی خطی دوسویه روزبه‌روز (حداکثر ~۷۳۰ گام) تا تطابق کامل toHijri؛ ورودی نامعتبر/خارج از محدوده ۱۳۰۰-۱۶۰۰ → null
+   326→- نکته فنی: جستجوی صرفاً سال‌محور (ژانویه سال تخمینی ±۳۶۶ گام) در یک مورد شکست خورد (۱۱ رمضان ۱۴۵۱ = ۲۰۳۰-۰۱-۱۵ یعنی ~۳۸۰ روز جلوتر از ژانویه سال تخمینی)؛ تخمین به سطح «تاریخ» بهبود یافت (همان فرمول + offset ماه/روز) و حل شد
+   327→- درست‌سنجی hijri (bun -e): ۱ رمضان ۱۴۴۶ = ۲۰۲۵-۰۳-۰۱ دقیق ✓؛ roundtrip گسترده هر ۳۷ روز بین ۱۹۹۰ تا ۲۰۴۰ = ۴۹۴/۴۹۴ پاس؛ امروز (۱۷ جمادی‌الثانی ۱۴۴۸) بدون خطا ✓
+   328→- src/components/planner/fal-section.tsx (default export FalSection): SectionHeader با MoonStar و #8B5CF6 + سه تب (فال روزانه/مبدل تاریخ/محاسبه تولد) با TabsTrigger فشرده (text-[11px] sm:text-sm، TabsList grid تمام‌عرض) برای عرض ۲۶۷px
+   329→- تب فال روزانه: استور بیرونی ماژول-لوکل برای ماه تولد (readBirthMonth/writeBirthMonth روی localStorage "planner.fal.birth-month" با کش + گوش دادن به "planner:birth-month-changed" و "storage" با invalidation کش) که با useSyncExternalStore (server snapshot = null) هویدریشن‌سازگار است — هیچ setState همگام داخل useEffect وجود ندارد؛ بدون ماه تولد: کارت دعوت با ۱۲ دکمه قرصی (انتخاب → writeBirthMonth + dispatch رویداد + toast «ماه تولدت ثبت شد ✨»)؛ کارت اصلی: تایل ایموجی بزرگ با tint رنگ برج، تیتر «فال امروز — متولدین [ماه] ([برج]) [symbol]»، تاریخ امروز formatJalaliFull، تیتر «ویژگی‌های متولدین» + ۴ چیپ، متن فال در باکس bg-secondary/50 با انیمیشن motion (کلید month-index)، چیپ «عدد شانس امروز: [فارسی]» و «رنگ شانس: [نام]» با دات رنگ (سفید هم با border دیده می‌شود)، دکمه کپی متن (navigator.clipboard + toast + آیکون Check موقت) و لینک «تغییر ماه تولد» (پاک‌کردن کلید + دعوت دوباره)؛ زیر آن «فال همه ماه‌ها» با گرید grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 از ۱۲ کارت فشرده (همه min-w-0، کارت فعال با رنگ برج و متن سفید، بج «ماه من»، کلیک دوباره = بازگشت به فال ماه تولد)
+   330→- تب مبدل تاریخ: سگمنت سه‌دکمه قرصی (شمسی/میلادی/قمری، گرادیان بنفش روی فعال) + سه ورودی: سال Input با digitsOnly (ارقام فارسی/عربی/لاتین مجاز)، ماه Select با نام ماه‌های همان تقویم (JALALI_MONTHS / GREGORIAN_MONTHS / HIJRI_MONTHS)، روز Input؛ پیش‌فرض بدون touch = «امروز» در تقویم مبدأ (فقط بعد از mounted)؛ اولین ویرایش از مقادیر نمایش‌داده‌شده seed می‌شود تا فیلدهای دیگر پاک نشوند؛ دکمه «امروز» = بازگشت به prefill؛ اعتبارسنجی: شمسی با isValidJalaaliDate (jalaali-js)، میلادی با round-trip سازنده Date، قمری با fromHijri + تطابق بازگشتی toHijri — نامعتبر → چیپ قرمز «تاریخ نامعتبر است» (bg-red-500/10 خوانا در هر ۴ تم)؛ دو کارت خروجی برای دو تقویم دیگر با «روز هفته + روز + نام ماه» و سال، همه با ارقام فارسی (میلادی فقط در همین تب نمایش داده می‌شود)
+   331→- تب محاسبه تولد: JalaliDatePicker (value=کلید YYYY-MM-DD با onChange، clearable) + EmptyState بدون تاریخ (Cake بنفش مشابه shared)؛ با تاریخ: ۶ InfoCard (روز هفته تولد با persianWeekday، سن دقیق «X سال، Y ماه، Z روز» با jalaliAgeParts، برج تولد با symbol/emoji/رنگ اختصاصی، نماد سال چینی با ایموجی، روزهای زندگی‌شده، «تا تولد بعدی X روز» یا «تولدت مبارکست! 🎂» وقتی صفر)
+   332→- مقادیر وابسته به «امروز» همه از useMemo با today = mounted ? new Date() : null می‌آیند (الگوی useSyncExternalStore مثل app-shell/use-clock)؛ ریسپانسیو: همه گریدها/کارت‌ها min-w-0، کارت‌ها p-4 sm:p-6، چیپ‌های بنفش با dark:text-violet-400 برای تم night، بدون هیچ عنصر عرض‌ثابت (تست ذهنی ۲۶۷px: سه تب و گرید ۲ ستونه جا می‌شود)
+   333→- راستی‌آزمایی: bun run lint بدون خطا/هشدار؛ npx tsc --noEmit فقط خطاهای قدیمی examples/ و skills/ — صفر خطا در src؛ اسموک لود کامل گراف import کامپوننت با bun موفق؛ dev server (قبلاً بالا بود — kill نشد) با curl 200 و dev.log بدون خطای کامپایل — رندر واقعی و اتصال ناوبری به 5-d واگذار شد
+   334→
+   335→Stage Summary:
+   336→- قرارداد برای 5-d: import FalSection (default export) از "@/components/planner/fal-section" و رندر در تب جدید (مثلاً "fal") — بدون prop؛ کامپوننت self-contained است
+   337→- توابع export شده: از lib/fal.ts → MONTH_FALS (۱۲ رکورد MonthFal: month/sign/symbol/emoji/color/traits[4]/texts[16])، LUCKY_COLORS (۹ {name,hex})، getFalOfTheDay(jy,jm,jd) → {text,index,luckyNumber,luckyColor}، getChineseZodiac(jy) → {animal,emoji}، jalaliAgeParts(birth,today) → {years,months,days}، daysUntilNextJalaliBirthday({jm,jd},today) → number (امروز=۰)؛ از lib/hijri.ts → HIJRI_MONTHS، toHijri(Date) → {hy,hm,hd}، fromHijri(hy,hm,hd) → Date|null
+   338→- قرارداد localStorage/رویداد ماه تولد (از 5-a) عیناً پیاده شد: کلید "planner.fal.birth-month" (مقدار ۱ تا ۱۲) + CustomEvent("planner:birth-month-changed") — نوشتن از هر جای برنامه فوراً این بخش را به‌روز می‌کند؛ storage event بین تب‌ها هم پشتیبانی می‌شود
+   339→- نتایج تست hijri: ۱ رمضان ۱۴۴۶ = ۱ مارس ۲۰۲۵ دقیق؛ roundtrip ۴۹۴/۴۹۴ تاریخ بین ۱۹۹۰-۲۰۴۰؛ امروز سالم؛ بازه پشتیبانی ۱۳۰۰-۱۶۰۰ قمری (خارج آن null)
+   340→- نتایج fal: ۱۹۲ متن unique، قطعیت فال روزانه تست شد، zodiac صحت تاریخی دارد، سن/روزهای تا تولد با ۵ کیس مرزی (شامل ۳۰ اسفند کبیسه/غیرکبیسه) درست
+   341→- lint و tsc پاس (خطاهای قدیمی فقط در examples/ و skills/)؛ فایل‌های ساخته‌شده: src/lib/fal.ts، src/lib/hijri.ts، src/components/planner/fal-section.tsx — هیچ فایل دیگری تغییر نکرد
+   342→---
+   343→Task ID: 5-d
+   344→Agent: general-purpose
+   345→Task: یکپارچه‌سازی فرانت‌اند — تنظیمات، پنل مدیر، بنر تبلیغ، کارت خوشامد، تب فال
+   346→
+   347→Work Log:
+   348→- خواندن اجباری worklog.md (قراردادهای 5-a: تم/کانفیگ/کلید ماه تولد، 5-b: FalSection self-contained، 5-c: APIهای مدیر) و فایل‌های مرجع: app-shell.tsx، dashboard.tsx، fal-section.tsx (امضاها)، app-config-context.tsx، themes.ts، dialog/select/switch و route اعتبارسنجی /api/admin/settings (برای هم‌راستایی دقیق کلاینت با سرور)
+   349→- src/components/planner/ad-banner.tsx (جدید، دو export):
+   350→  • AdBanner: گیت isReady && adsEnabled (تا قبلش هیچ‌چیز رندر نمی‌شود)؛ کارت گرادیانی from-amber-500 via-orange-500 to-rose-500 با چیپ «تبلیغ»، آیکون Megaphone، adTitle/adText، تصویر گرد ۶۴/۸۰px با alt فارسی و onError→مخفی (state imageBroken)، دکمه adButtonText با target=_blank rel="noopener noreferrer nofollow" فقط اگر adLink موجود باشد؛ motion ورود ملایم
+   351→  • WelcomeContactCard: گیت isReady && welcomeVersion > seenWelcomeVersion && (welcomeText یا buildContactUrl)؛ گرادیان from-violet-500 via-purple-500 to-fuchsia-500، آیکون MessageCircleHeart، دکمه «ارتباط با پشتیبانی» (لینک عمیق کانال) و دکمه X (min-h-11) با dismissWelcome() — قابل بستن
+   352→- src/components/planner/settings-dialog.tsx (جدید، default export SettingsDialog{open,onOpenChange}): Dialog max-w-lg rounded-3xl، هدر با دکمه بستن اختصاصی ۴۴px (RTL)، محتوا max-h-[75vh] overflow-y-auto؛ پنج سکشن:
+   353→  a) تم برنامه: گرید ۲×۲ از THEMES با سه دایره swatch (bg/primary/accent)، نام/توضیح فارسی، تم فعال ring-2 + تیک؛ کلیک → useTheme().setTheme(id) + toast «تم اعمال شد» (بدون دستکاری dataset.theme)
+   354→  b) ماه تولد: ۱۲ قرص از JALALI_MONTHS (h-11 لمسی)؛ خواندن/نوشتن localStorage "planner.fal.birth-month" + dispatch CustomEvent("planner:birth-month-changed") (قرارداد 5-a — fal-section فوراً آپدیت می‌شود) + toast؛ دکمه «حذف انتخاب»
+   355→  c) پشتیبانی و ارتباط: از useAppConfig + buildContactUrl؛ دکمه بزرگ رنگ برند کانال (واتساپ #25D366/تلگرام #229ED9/بله cyan-600) با آیکون lucide؛ وگرنه «در حال حاضر راه ارتباطی ثبت نشده است»
+   356→  d) ورود مدیر: تشخیص لاگین با GET /api/admin/settings هنگام باز شدن دیالوگ (200→in، 401→out)؛ ورود با POST /api/admin/login (401→«رمز اشتباه است»، 429→دقیقه باقی‌مانده با faNum)؛ پس از ورود: دکمه «پنل مدیریت» (AdminPanel داخل همین دیالوگ با state محلی) + «خروج» (POST /api/admin/logout)
+   357→  e) درباره برنامه: نسخه ۱.۰.۰ با faNum + «تقویم ۱۰۰٪ شمسی با تعطیلات رسمی ایران»
+   358→- src/components/planner/admin-panel.tsx (جدید، default export AdminPanel{open,onOpenChange}): Dialog max-w-2xl با max-h-[80vh] اسکرول‌شو؛ بارگذاری فرم از GET /api/admin/settings هنگام باز شدن (401→toast + بستن)؛ سکشن تبلیغ (Switch adsEnabled با رنگ کهربایی، adTitle، adText، adImage با dir=ltr، adButtonText، adLink)، سکشن ارتباط با مشتری (۴ دکمه کانال واتساپ/تلگرام/بله/هیچ با aria-pressed — گروه خارج از label برای نام دسترس‌پذیری تمیز، راهنمای target per-channel، contactMessage، welcomeText، دکمه «نمایش مجدد کارت برای همه کاربران» = welcomeVersion+1 با نمایش نسخه فعلی)، دکمه ذخیره (PUT کامل → 200: toast «ذخیره شد» + fillForm از پاسخ + refresh() کانکست برای آپدیت فوری بنر؛ 400/401/429/شبکه با toast فارسی)، سکشن امنیت (تغییر رمز با تطابق کلاینت + طول ۸..۶۴ → PUT /api/admin/password؛ خروج)؛ اعتبارسنجی سبک کلاینت عیناً هم‌راستا با قواعد PUT 5-c (طول‌ها، ^https?:// برای لینک‌ها، الگوی شماره/نام‌کاربری per-channel، خالی‌بودن target برای NONE، welcomeVersion 1..۱۰۰۰۰۰۰)؛ همه fetch ها credentials:"same-origin"؛ دکمه‌های اصلی h-11/h-12
+   359→- app-shell.tsx (ویرایش کم‌دست): TabKey += "fal"؛ NAV_ITEMS ۹ تایی با درج {fal, «فال و ابزار», shortLabel «فال», MoonStar, #8B5CF6} بین events و habits؛ import + رندر FalSection در چرخه سکشن‌ها؛ state settingsOpen + رندر SettingsDialog؛ دکمه تنظیمات در هدر موبایل (h-11 w-11 گرد، aria-label «تنظیمات») و دکمه «تنظیمات» متنی در سایدبار دسکتاپ بعد از nav؛ کامنت باتم‌ناو به «۹ آیتم» به‌روز شد — ساعت/لایه‌ها/AnimatePresence دست‌نخورده
+   360→- dashboard.tsx (ویرایش کم‌دست): import + رندر <WelcomeContactCard /> و <AdBanner /> در ابتدای ستون (قبل از کارت هیرو) — بدون گیت اضافه (خودشان isReady دارند)؛ هیچ بخش دیگری تغییر نکرد
+   361→- راستی‌آزمایی: bun run lint صفر خطا/هشدار (۲ مورد اولیه رفع شد: unused eslint-disable برای img و react-hooks/set-state-in-effect با الگوی async/alive مثل app-config-context)؛ npx tsc --noEmit فقط ۴ خطای قدیمی examples/ و skills/ — صفر خطا در src؛ یک اصلاح a11y در پنل مدیر بعد از تست انجام شد
+   362→
+   363→Stage Summary:
+   364→- نتیجه تست مرورگر (agent-browser، همه گام‌های اجباری):
+   365→  ✓ هدر موبایل 390: دکمه چرخ‌دنده «تنظیمات» باز شد و هر ۵ سکشن رندر شد
+   366→  ✓ تم: زمرد→شب→غروب→شکوفه؛ dataset.theme عوض شد و پس‌زمینه body بین rgb(242,247,244)/rgb(22,19,29)/rgb(255,249,236)/rgb(255,248,240) تغییر کرد
+   367→  ✓ ماه تولد: کلیک «آبان» → localStorage planner.fal.birth-month=8 + toast «ماه «آبان» ثبت شد…» + تب فال بلافاصله کارت «فال امروز — متولدین آبان (عقرب) ♏» با متن/تاریخ/عدد و رنگ شانس نشان داد (رویداد سفارشی کار می‌کند)
+   368→  ✓ مبدل: 1404/5/20 شمسی → میلادی «دوشنبه ۱۱ اوت ۲۰۲۵» و قمری «دوشنبه ۱۷ صفر ۱۴۴۷» (هر دو صحیح)
+   369→  ✓ محاسبه تولد: ۱۰ شهریور ۱۴۰۵ → سه‌شنبه، سن ۰/۰/۲۷، برج سنبله ♍، اسب 🐴، ۲۷ روز زندگی، تولد بعدی ۳۳۸ روز
+   370→  ✓ مدیر: رمز غلط → toast «رمز اشتباه است»؛ admin1404 → «خوش آمدی، مدیر! 👑» و دکمه‌های پنل/خروج؛ پنل با فرم پرشده از GET باز شد
+   371→  ✓ تبلیغ: روشن + «کافه چلچراغ» + ذخیره → toast «ذخیره شد ✅» و بنر گرادیانی بالای داشبورد (قبل از هیرو) ظاهر شد؛ خاموش + ذخیره → بنر غیب شد (بدون فضای خالی)
+   372→  ✓ کارت خوشامد: متن + «نمایش مجدد» (welcomeVersion 1→2) + ذخیره → کارت بنفش بالای بنر تبلیغ آمد و X آن کار کرد (planner.welcome.seen-version=2 و دیگر نشان داده نمی‌شود)
+   373→  ✓ عرض‌های 390/320/267 در سه حالت (خانه، تب فال، دیالوگ تنظیمات باز): scrollWidth − innerWidth = 0 (سرریز صفر)
+   374→  ✓ کنسول/خطاهای صفحه: هیچ خطایی (فقط پیام‌های اطلاعاتی dev)
+   375→- وضعیت نهایی تنظیمات پس از تست: adsEnabled=false (بنر خاموش)، welcomeText ثبت‌شده با welcomeVersion=2 (برای نمایش دوباره باید نسخه از پنل += شود)، contactChannel=NONE، ادمین logout شده (کوکی پاک)؛ رمز مدیر همان admin1404
+   376→- نکات باقی‌مانده: بنر تبلیغ با <img> معمولی است (eslint @next/next/no-img-element فعال نیست؛ در صورت فعال‌شدن آینده، eslint-disable موضعی لازم می‌شود)؛ دکمه‌های کانال پنل مدیر بیرون از <label> رندر می‌شوند تا نام دسترس‌پذیری تمیز بماند؛ deployment واقعی هنوز ADMIN_SESSION_SECRET/secure cookie را می‌خواهد (یادآوری 5-c)
+   377→

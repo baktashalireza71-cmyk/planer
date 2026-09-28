@@ -3,6 +3,13 @@
 import { useMemo, useState } from "react";
 import { CalendarDays, ChevronRight, ChevronLeft, X, RotateCcw } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { cn } from "@/lib/utils";
 import {
   JALALI_MONTHS,
@@ -25,6 +32,9 @@ import { getIranianHoliday } from "@/lib/iran-holidays";
 //  مقدار ورودی/خروجی همان کلید میلادی «YYYY-MM-DD» است تا با بک‌اند سازگار بماند،
 //  ولی تمام نمایش و تعامل کاربر با تقویم شمسی انجام می‌شود.
 // ─────────────────────────────────────────────────────────────────────────────
+
+// بازه سال‌های انتخاب‌گر برای پرش سریع (مثلا برای تاریخ تولد)
+const PICKER_YEARS = Array.from({ length: 161 }, (_, i) => 1300 + i);
 
 interface JalaliDatePickerProps {
   /** کلید میلادی «YYYY-MM-DD» یا null (بدون تاریخ) */
@@ -116,10 +126,48 @@ export default function JalaliDatePicker({
             >
               <ChevronRight className="h-4 w-4" />
             </button>
-            <div className="text-center">
-              <p className="text-sm font-black text-foreground">
-                {JALALI_MONTHS[view.jm - 1]} {faNum(view.jy)}
-              </p>
+            <div className="flex flex-col items-center gap-0.5">
+              {/* انتخاب مستقیم ماه و سال — برای پرش سریع (مثلا تاریخ تولد) */}
+              <div className="flex items-center justify-center gap-0.5">
+                <Select
+                  value={String(view.jm)}
+                  onValueChange={(v) => setView((w) => ({ ...w, jm: Number(v) }))}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    aria-label="انتخاب ماه"
+                    className="h-7 w-auto gap-0.5 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[13px] font-black shadow-none hover:bg-accent cursor-pointer"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JALALI_MONTHS.map((m, i) => (
+                      <SelectItem key={m} value={String(i + 1)}>
+                        {m}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <Select
+                  value={String(view.jy)}
+                  onValueChange={(v) => setView((w) => ({ ...w, jy: Number(v) }))}
+                >
+                  <SelectTrigger
+                    size="sm"
+                    aria-label="انتخاب سال"
+                    className="h-7 w-auto gap-0.5 rounded-lg border-0 bg-transparent px-1.5 py-0 text-[13px] font-black tabular-nums shadow-none hover:bg-accent cursor-pointer"
+                  >
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {PICKER_YEARS.map((y) => (
+                      <SelectItem key={y} value={String(y)}>
+                        {faNum(y)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <button
                 type="button"
                 onClick={() => {
@@ -180,7 +228,7 @@ export default function JalaliDatePicker({
                     isSelected
                       ? "bg-violet-500 text-white shadow-md shadow-violet-500/30 scale-105"
                       : isToday
-                        ? "ring-2 ring-orange-400 text-orange-600"
+                        ? "ring-2 ring-orange-400 text-orange-600 dark:text-orange-400"
                         : "hover:bg-accent",
                     !isSelected && isOff && (isSelected ? "" : "text-red-500"),
                     holiday && !isSelected && "font-black"

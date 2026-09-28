@@ -77,8 +77,8 @@ export default function GoalsSection() {
       {/* خلاصه */}
       {goals.length > 0 && (
         <div className="flex items-center gap-4 rounded-3xl bg-card p-4 card-glow">
-          <ProgressRing value={avgPct} size={64} stroke={7} color="#10B981">
-            <span className="text-xs font-black text-emerald-600">{faNum(avgPct)}٪</span>
+          <ProgressRing value={avgPct} size={64} stroke={7} color="#10B981" track="rgba(16,185,129,0.2)">
+            <span className="text-xs font-black text-emerald-600 dark:text-emerald-300">{faNum(avgPct)}٪</span>
           </ProgressRing>
           <div>
             <p className="text-sm font-extrabold">
@@ -127,18 +127,18 @@ export default function GoalsSection() {
                   exit={{ opacity: 0, scale: 0.96 }}
                   className={cn(
                     "rounded-3xl bg-card p-5 card-glow relative overflow-hidden",
-                    isDone && "ring-2 ring-emerald-300"
+                    isDone && "ring-2 ring-emerald-300 dark:ring-emerald-500/40"
                   )}
                 >
                   {isDone && (
-                    <div aria-hidden className="absolute -top-6 -left-6 h-20 w-20 rounded-full bg-emerald-100/80 blur-xl" />
+                    <div aria-hidden className="absolute -top-6 -left-6 h-20 w-20 rounded-full bg-emerald-100/80 blur-xl dark:bg-emerald-500/20" />
                   )}
                   <div className="relative flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <div className="flex items-center gap-2">
                         <p className="truncate text-sm font-extrabold">{goal.title}</p>
                         {isDone && (
-                          <Chip className="bg-emerald-100 text-emerald-700 shrink-0">
+                          <Chip className="bg-emerald-100 text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-300 shrink-0">
                             <Trophy className="h-3 w-3" />
                             تکمیل شد!
                           </Chip>
@@ -225,7 +225,7 @@ export default function GoalsSection() {
                               { onError: (e) => toast.error(e.message) }
                             )
                           }
-                          className="h-8 rounded-xl gap-1 border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                          className="h-8 rounded-xl gap-1 border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
                         >
                           <Flag className="h-3.5 w-3.5" />
                           {faNum(5)} قدم
@@ -257,7 +257,7 @@ export default function GoalsSection() {
                             { onError: (e) => toast.error(e.message) }
                           )
                         }
-                        className="h-8 rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50"
+                        className="h-8 rounded-xl border-emerald-200 text-emerald-600 hover:bg-emerald-50 dark:border-emerald-500/30 dark:text-emerald-300 dark:hover:bg-emerald-500/10"
                       >
                         شروع دوباره
                       </Button>
@@ -267,7 +267,7 @@ export default function GoalsSection() {
                         className={cn(
                           "ms-auto shrink-0",
                           deadline < new Date() && !isDone
-                            ? "bg-red-100 text-red-600"
+                            ? "bg-red-100 text-red-600 dark:bg-red-500/15 dark:text-red-300"
                             : "bg-muted text-muted-foreground"
                         )}
                       >
@@ -368,7 +368,7 @@ function GoalDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
               <Target className="h-4 w-4" />
             </span>
             {editing ? "ویرایش هدف" : "هدف جدید"}

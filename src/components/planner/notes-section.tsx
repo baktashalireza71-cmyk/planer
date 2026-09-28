@@ -228,7 +228,7 @@ function NoteDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-amber-100 text-amber-600 dark:bg-amber-500/15 dark:text-amber-300">
               <StickyNote className="h-4 w-4" />
             </span>
             {editing ? "ویرایش یادداشت" : "یادداشت جدید"}

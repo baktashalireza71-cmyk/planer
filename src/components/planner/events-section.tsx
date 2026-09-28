@@ -66,8 +66,8 @@ function faToEn(s: string): string {
 
 /** برچسب و رنگ چیپ شمارش معکوس رویداد */
 function countdownOf(daysLeft: number): { label: string; cls: string } {
-  if (daysLeft === 0) return { label: "امروز", cls: "bg-green-100 text-emerald-600" };
-  if (daysLeft > 0) return { label: `${faNum(daysLeft)} روز مانده`, cls: "bg-orange-100 text-orange-600" };
+  if (daysLeft === 0) return { label: "امروز", cls: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-300" };
+  if (daysLeft > 0) return { label: `${faNum(daysLeft)} روز مانده`, cls: "bg-orange-500/10 text-orange-600 dark:text-orange-300" };
   return { label: "گذشته", cls: "bg-muted text-muted-foreground" };
 }
 
@@ -139,7 +139,7 @@ export default function EventsSection() {
       {events.length > 0 && (
         <div className="grid grid-cols-2 gap-3">
           <div className="rounded-2xl bg-card p-4 card-glow flex items-center gap-3 min-w-0">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
               <CalendarHeart className="h-5 w-5" strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
@@ -159,7 +159,7 @@ export default function EventsSection() {
             </div>
           </div>
           <div className="rounded-2xl bg-card p-4 card-glow flex items-center gap-3">
-            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
               <Cake className="h-5 w-5" strokeWidth={2.2} />
             </div>
             <div className="min-w-0">
@@ -216,7 +216,7 @@ export default function EventsSection() {
           }
         />
       ) : filtered.length === 0 ? (
-        <div className="rounded-3xl border-2 border-dashed border-border/80 px-6 py-8 text-center bg-white/50 text-sm text-muted-foreground">
+        <div className="rounded-3xl border-2 border-dashed border-border/80 px-6 py-8 text-center bg-card/60 text-sm text-muted-foreground">
           رویدادی در این دسته پیدا نشد.
         </div>
       ) : (
@@ -240,7 +240,8 @@ export default function EventsSection() {
                     <div
                       className={cn(
                         "flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-                        meta.bg
+                        meta.bg,
+                        "dark:bg-white/10"
                       )}
                       style={{ color: meta.color }}
                     >
@@ -252,13 +253,13 @@ export default function EventsSection() {
                       <p className="truncate text-sm font-extrabold">{e.title}</p>
                       <div className="mt-1 flex flex-wrap items-center gap-1.5">
                         {e.yearly && (
-                          <Chip className="bg-rose-50 text-rose-600 shrink-0">
+                          <Chip className="bg-rose-50 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300 shrink-0">
                             <Repeat className="h-3 w-3" />
                             هر سال
                           </Chip>
                         )}
                         {e.type === "BIRTHDAY" && e.yearly && typeof e.birthYear === "number" && (
-                          <Chip className="bg-pink-100 text-pink-600 shrink-0">
+                          <Chip className="bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300 shrink-0">
                             <Cake className="h-3 w-3" />
                             {faNum(jalaliAge(e.birthYear))} ساله می‌شود
                           </Chip>
@@ -402,7 +403,7 @@ function EventDialog({
       <DialogContent aria-describedby={undefined} className="max-w-md rounded-3xl" dir="rtl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-right">
-            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600">
+            <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
               <CalendarHeart className="h-4 w-4" />
             </span>
             {editing ? "ویرایش رویداد" : "رویداد جدید"}
@@ -443,8 +444,8 @@ function EventDialog({
                     className={cn(
                       "flex flex-col items-center justify-center gap-1 rounded-xl border-2 px-1 py-2 text-[10.5px] font-bold leading-tight transition-all cursor-pointer",
                       active
-                        ? "border-rose-400 bg-rose-50 ring-2 ring-rose-200"
-                        : "border-border text-muted-foreground hover:border-rose-200 hover:text-rose-500"
+                        ? "border-rose-400 bg-rose-50 ring-2 ring-rose-200 dark:bg-rose-500/15 dark:border-rose-500/40 dark:ring-rose-500/30"
+                        : "border-border text-muted-foreground hover:border-rose-200 hover:text-rose-500 dark:hover:border-rose-500/40"
                     )}
                     style={active ? { color: meta.color } : undefined}
                   >

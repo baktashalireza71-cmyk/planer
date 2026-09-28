@@ -1,7 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-@custom-variant dark (&:is(.dark *));
+/* تم تاریک برنامه روی data-theme="night" سوار است تا با سیستم ۴ تم سازگار باشد */
+@custom-variant dark (&:is([data-theme="night"] *));
 
 @theme inline {
   --color-background: var(--background);
@@ -79,33 +80,112 @@
   --sidebar-ring: #fb923c;
 }
 
-.dark {
-  --background: #221a13;
-  --foreground: #f7ede2;
-  --card: #2c2118;
-  --card-foreground: #f7ede2;
-  --popover: #2c2118;
-  --popover-foreground: #f7ede2;
-  --primary: #fb923c;
-  --primary-foreground: #221a13;
-  --secondary: #382a1e;
-  --secondary-foreground: #fed7aa;
-  --muted: #382a1e;
-  --muted-foreground: #b39d8a;
-  --accent: #382a1e;
-  --accent-foreground: #fdba74;
+/* ─── تم «زمرد» — سبز تیل مردانه و خنک ─── */
+[data-theme="emerald"] {
+  --radius: 1rem;
+  --background: #f2f7f4;
+  --foreground: #16302a;
+  --card: #ffffff;
+  --card-foreground: #16302a;
+  --popover: #ffffff;
+  --popover-foreground: #16302a;
+  --primary: #0d9488;
+  --primary-foreground: #ffffff;
+  --secondary: #e3f0ec;
+  --secondary-foreground: #115e59;
+  --muted: #ecf3f0;
+  --muted-foreground: #5f7d74;
+  --accent: #e3f0ec;
+  --accent-foreground: #0f766e;
+  --destructive: #ef4444;
+  --border: #d8e6e0;
+  --input: #cfe0d9;
+  --ring: #14b8a6;
+  --chart-1: #0d9488;
+  --chart-2: #059669;
+  --chart-3: #ca8a04;
+  --chart-4: #f59e0b;
+  --chart-5: #64748b;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #16302a;
+  --sidebar-primary: #0d9488;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #e3f0ec;
+  --sidebar-accent-foreground: #0f766e;
+  --sidebar-border: #d8e6e0;
+  --sidebar-ring: #14b8a6;
+}
+
+/* ─── تم «شب» — تاریک بنفش‌فام برای چشم ─── */
+[data-theme="night"] {
+  --radius: 1rem;
+  --background: #16131d;
+  --foreground: #f1edf9;
+  --card: #211c2b;
+  --card-foreground: #f1edf9;
+  --popover: #211c2b;
+  --popover-foreground: #f1edf9;
+  --primary: #7c3aed;
+  --primary-foreground: #ffffff;
+  --secondary: #2c2537;
+  --secondary-foreground: #ddd6f3;
+  --muted: #2a2434;
+  --muted-foreground: #a99fc2;
+  --accent: #2c2537;
+  --accent-foreground: #c4b5fd;
   --destructive: #f87171;
-  --border: #3d2e21;
-  --input: #3d2e21;
-  --ring: #fb923c;
-  --sidebar: #2c2118;
-  --sidebar-foreground: #f7ede2;
-  --sidebar-primary: #fb923c;
-  --sidebar-primary-foreground: #221a13;
-  --sidebar-accent: #382a1e;
-  --sidebar-accent-foreground: #fdba74;
-  --sidebar-border: #3d2e21;
-  --sidebar-ring: #fb923c;
+  --border: #352d44;
+  --input: #352d44;
+  --ring: #a78bfa;
+  --chart-1: #a78bfa;
+  --chart-2: #34d399;
+  --chart-3: #fb7185;
+  --chart-4: #fbbf24;
+  --chart-5: #e879f9;
+  --sidebar: #1d1826;
+  --sidebar-foreground: #f1edf9;
+  --sidebar-primary: #7c3aed;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #2c2537;
+  --sidebar-accent-foreground: #c4b5fd;
+  --sidebar-border: #352d44;
+  --sidebar-ring: #a78bfa;
+}
+
+/* ─── تم «غروب» — کهربایی گرم و درخشان ─── */
+[data-theme="sunset"] {
+  --radius: 1rem;
+  --background: #fff9ec;
+  --foreground: #43301f;
+  --card: #ffffff;
+  --card-foreground: #43301f;
+  --popover: #ffffff;
+  --popover-foreground: #43301f;
+  --primary: #d97706;
+  --primary-foreground: #ffffff;
+  --secondary: #fdf0d9;
+  --secondary-foreground: #92400e;
+  --muted: #faf0da;
+  --muted-foreground: #9c8265;
+  --accent: #fdf0d9;
+  --accent-foreground: #b45309;
+  --destructive: #e11d48;
+  --border: #f2e2c4;
+  --input: #ecd9b6;
+  --ring: #f59e0b;
+  --chart-1: #d97706;
+  --chart-2: #e11d48;
+  --chart-3: #0d9488;
+  --chart-4: #8b5cf6;
+  --chart-5: #ca8a04;
+  --sidebar: #fffdf6;
+  --sidebar-foreground: #43301f;
+  --sidebar-primary: #d97706;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #fdf0d9;
+  --sidebar-accent-foreground: #b45309;
+  --sidebar-border: #f2e2c4;
+  --sidebar-ring: #f59e0b;
 }
 
 @layer base {
@@ -127,11 +207,18 @@
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #fdba74, #f472b6);
+  background: linear-gradient(180deg, var(--primary), var(--chart-3));
   border-radius: 99px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #fb923c, #ec4899);
+  background: linear-gradient(180deg, var(--ring), var(--chart-3));
+}
+
+/* ─── ترنیشن نرم بین تم‌ها ─── */
+body,
+aside,
+.card {
+  transition: background-color 0.25s ease, border-color 0.25s ease;
 }
 
 /* ─── کلاس‌های کمکی ─── */
@@ -140,6 +227,13 @@
   -webkit-background-clip: text;
   background-clip: text;
   -webkit-text-fill-color: transparent;
+}
+
+/* در تم شب نسخه روشن‌تر گرادیان برند تا تیترها خوانا بمانند */
+[data-theme="night"] .text-gradient {
+  background: linear-gradient(120deg, #fb923c 20%, #f472b6 60%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
 }
 
 .card-glow {
