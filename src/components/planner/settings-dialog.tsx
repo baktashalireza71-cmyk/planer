@@ -4,7 +4,7 @@
  * دیالوگ تنظیمات برنامه
  * ------------------------------------------------
  * شامل: انتخاب تم، ماه تولد (فال روزانه)، پشتیبانی و ارتباط،
- * ورود مدیر (و پنل مدیریت) و درباره برنامه.
+ * ورود مدیر (و پنل مدیریت)، حریم خصوصی و درباره برنامه.
  * تشخیص وضعیت ورود مدیر: GET /api/admin/settings هنگام باز شدن
  * (200 → لاگین، 401 → مهمان).
  */
@@ -29,6 +29,8 @@ import {
   MessagesSquare,
   X,
   Loader2,
+  Lock,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -108,6 +110,7 @@ export default function SettingsDialog({
             <BirthMonthSection />
             <SupportSection />
             <AdminSection />
+            <PrivacySection />
             <AboutSection />
           </div>
         </div>
@@ -454,6 +457,126 @@ function AdminSection() {
 
       {/* پنل مدیریت — داخل همین دیالوگ باز می‌شود */}
       <AdminPanel open={adminOpen} onOpenChange={setAdminOpen} />
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  و) حریم خصوصی
+// ─────────────────────────────────────────────
+const PRIVACY_POINTS = [
+  "همه اطلاعات تو فقط روی خودِ دستگاه ذخیره می‌شود — نه روی هیچ سروری.",
+  "بدون ثبت‌نام، بدون حساب کاربری، بدون جمع‌آوری هیچ داده‌ای.",
+  "برنامه به هیچ دسترسی حساسی (مخاطبین، موقعیت مکانی، دوربین یا میکروفن) نیاز ندارد.",
+];
+
+const PRIVACY_POLICY: { title: string; body: string }[] = [
+  {
+    title: "۱) جمع‌آوری اطلاعات",
+    body: "پلنر من هیچ اطلاعات شخصی‌ای جمع‌آوری نمی‌کند. همه اطلاعات تو — کارها، عادت‌ها، اهداف، یادداشت‌ها، رویدادها و ماه تولد — فقط در حافظهٔ محلی خودِ دستگاه ذخیره می‌شود و هرگز برای ما یا هیچ شخص ثالثی ارسال نمی‌شود.",
+  },
+  {
+    title: "۲) بدون ثبت‌نام و حساب کاربری",
+    body: "برای استفاده از برنامه نیازی به ثبت‌نام، شماره تلفن، ایمیل یا هرگونه اطلاعات هویتی نیست.",
+  },
+  {
+    title: "۳) تبلیغات",
+    body: "تبلیغات این برنامه به‌صورت دستی توسط سازنده در یک کادر اطلاعاتی نمایش داده می‌شود؛ هیچ سرویس تبلیغاتی شخص ثالثی (مانند AdMob) در برنامه فعال نیست و هیچ داده‌ای برای هدف‌گیری تبلیغ رد و بدل نمی‌شود. لینک‌های داخل تبلیغ تو را به بیرون از برنامه می‌برند و مسئولیت مرور آن صفحه‌ها با خودت است.",
+  },
+  {
+    title: "۴) راه‌های ارتباطی",
+    body: "اگر از طریق واتساپ، تلگرام یا بله با ما تماس بگیری، گفت‌وگوی تو در همان پیام‌رسان انجام می‌شود و تابع سیاست حریم خصوصی آن پیام‌رسان است. برنامه فقط یک دکمهٔ میان‌بُر برای رفتن به آن‌ها نشان می‌دهد.",
+  },
+  {
+    title: "۵) دسترسی‌های برنامه",
+    body: "برنامه به هیچ‌یک از دسترسی‌های حساس دستگاه — مخاطبین، موقعیت مکانی، دوربین، میکروفن یا فایل‌ها — نیاز ندارد.",
+  },
+  {
+    title: "۶) حذف اطلاعات",
+    body: "همهٔ اطلاعات تو فقط روی دستگاه خودت است؛ با پاک‌کردن داده‌های برنامه (یا حذف خود برنامه) همه‌چیز برای همیشه و به‌طور کامل حذف می‌شود.",
+  },
+  {
+    title: "۷) امنیت",
+    body: "چون اطلاعات هرگز از دستگاه خارج نمی‌شود، ریسک نشت داده یا نفوذ به سرور وجود ندارد. رمز پنل مدیریت نیز به‌صورت رمزنگاری‌شده (hash) ذخیره می‌شود و نشست ورود فقط روی همان دستگاه اعتبار دارد.",
+  },
+  {
+    title: "۸) کودکان",
+    body: "این برنامه برای همهٔ سنین مناسب است و هیچ داده‌ای از هیچ کاربری — بزرگسال یا کودک — جمع نمی‌کند.",
+  },
+  {
+    title: "۹) تغییرات سیاست",
+    body: "اگر در آینده بخشی از این سیاست تغییر کند، نسخهٔ جدید در همین بخش از تنظیمات برنامه اعلام می‌شود.",
+  },
+];
+
+function PrivacySection() {
+  const [policyOpen, setPolicyOpen] = useState(false);
+
+  return (
+    <section className="rounded-2xl border border-border/60 bg-card p-4">
+      <h4 className="mb-2 flex items-center gap-2 text-sm font-extrabold">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+          <Lock className="h-3.5 w-3.5" />
+        </span>
+        حریم خصوصی
+      </h4>
+      <ul className="mb-3 space-y-1.5">
+        {PRIVACY_POINTS.map((point) => (
+          <li
+            key={point}
+            className="flex items-start gap-1.5 text-xs leading-relaxed text-muted-foreground"
+          >
+            <Check className="mt-0.5 h-3.5 w-3.5 shrink-0 text-emerald-500" />
+            <span className="min-w-0">{point}</span>
+          </li>
+        ))}
+      </ul>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setPolicyOpen(true)}
+        className="h-9 gap-1.5 rounded-full text-xs font-bold text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-700 dark:text-emerald-400 dark:hover:text-emerald-400"
+      >
+        <FileText className="h-3.5 w-3.5" />
+        مشاهده سیاست کامل حریم خصوصی
+      </Button>
+
+      {/* دیالوگ سیاست کامل — داخل همین دیالوگ تنظیمات */}
+      <Dialog open={policyOpen} onOpenChange={setPolicyOpen}>
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-lg gap-0 overflow-hidden rounded-3xl p-0"
+        >
+          <div className="flex max-h-[75vh] flex-col">
+            <DialogHeader className="relative border-b border-border/60 px-5 py-4 text-right sm:text-right">
+              <DialogTitle className="flex items-center gap-2 text-base font-black">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/20 dark:text-emerald-400">
+                  <Lock className="h-4 w-4" />
+                </span>
+                سیاست حریم خصوصی
+              </DialogTitle>
+              <DialogDescription className="text-xs">
+                پلنر من — نسخه {faNum("1.0.0")}
+              </DialogDescription>
+              <button
+                onClick={() => setPolicyOpen(false)}
+                aria-label="بستن سیاست حریم خصوصی"
+                className="absolute left-3 top-3 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </DialogHeader>
+            <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-5 py-4">
+              {PRIVACY_POLICY.map((item) => (
+                <div key={item.title}>
+                  <h5 className="mb-1 text-xs font-extrabold text-foreground">{item.title}</h5>
+                  <p className="text-xs leading-relaxed text-muted-foreground">{item.body}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </section>
   );
 }
