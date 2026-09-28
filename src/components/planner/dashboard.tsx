@@ -1,6 +1,6 @@
 "use client";
 
-import { motion } from "framer-motion";
+import { motion } from "framer-motion"; // فقط برای layout انیمیشن ردیف کارها
 import Image from "next/image";
 import {
   ListTodo,
@@ -96,12 +96,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
       <AdBanner />
 
       {/* ─── کارت خوش‌آمد ─── */}
-      <motion.section
-        initial={{ opacity: 0, scale: 0.98 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.35 }}
-        className="relative overflow-hidden rounded-3xl bg-gradient-to-bl from-orange-500 via-orange-400 to-pink-500 p-6 sm:p-8 text-white shadow-xl shadow-orange-500/25"
-      >
+      <section className="anim-enter-scale relative overflow-hidden rounded-3xl bg-gradient-to-bl from-orange-500 via-orange-400 to-pink-500 p-6 sm:p-8 text-white shadow-xl shadow-orange-500/25">
         <div aria-hidden className="absolute -top-10 -left-10 h-40 w-40 rounded-full bg-white/15 blur-2xl" />
         <div aria-hidden className="absolute -bottom-14 right-1/4 h-44 w-44 rounded-full bg-pink-300/25 blur-2xl" />
         <div className="relative flex items-center justify-between gap-4">
@@ -147,7 +142,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
             </ProgressRing>
           </div>
         </div>
-      </motion.section>
+      </section>
 
       {/* ─── کارت‌های آمار ─── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
@@ -186,12 +181,7 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
 
       <div className="grid gap-5 lg:grid-cols-5">
         {/* ─── کارهای امروز ─── */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.08 }}
-          className="lg:col-span-3 rounded-3xl bg-card p-5 card-glow"
-        >
+        <section className="anim-enter anim-delay-1 lg:col-span-3 rounded-3xl bg-card p-5 card-glow">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
               <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
@@ -238,17 +228,12 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
               ))}
             </ul>
           )}
-        </motion.section>
+        </section>
 
         {/* ─── ستون کنار: عادت‌ها + رویدادها + اهداف ─── */}
         <div className="lg:col-span-2 space-y-5">
           {/* عادت‌های امروز */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.12 }}
-            className="rounded-3xl bg-card p-5 card-glow"
-          >
+          <section className="anim-enter anim-delay-2 rounded-3xl bg-card p-5 card-glow">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
@@ -288,15 +273,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                 })}
               </div>
             )}
-          </motion.section>
+          </section>
 
           {/* رویدادهای پیش‌رو */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.16 }}
-            className="rounded-3xl bg-card p-5 card-glow"
-          >
+          <section className="anim-enter anim-delay-3 rounded-3xl bg-card p-5 card-glow">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-purple-100 text-purple-600 dark:bg-purple-500/15 dark:text-purple-300">
@@ -329,15 +309,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                 ))}
               </ul>
             )}
-          </motion.section>
+          </section>
 
           {/* رویدادهای نزدیک */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.24 }}
-            className="rounded-3xl bg-card p-5 card-glow min-w-0"
-          >
+          <section className="anim-enter anim-delay-5 rounded-3xl bg-card p-5 card-glow min-w-0">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-rose-100 text-rose-600 dark:bg-rose-500/15 dark:text-rose-300">
@@ -379,15 +354,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                 ))}
               </ul>
             )}
-          </motion.section>
+          </section>
 
           {/* اهداف فعال */}
-          <motion.section
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-3xl bg-card p-5 card-glow"
-          >
+          <section className="anim-enter anim-delay-4 rounded-3xl bg-card p-5 card-glow">
             <div className="mb-3 flex items-center justify-between">
               <h3 className="flex items-center gap-2 font-extrabold text-[15px]">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600 dark:bg-emerald-500/15 dark:text-emerald-300">
@@ -412,12 +382,10 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                         <span className="tabular-nums text-muted-foreground">{faNum(pct)}٪</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-muted">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${pct}%` }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: g.color }}
+                        {/* پر شدن نوار با CSS خالص — بدون انتظار برای جاوااسکریپت */}
+                        <div
+                          className="anim-bar h-full rounded-full"
+                          style={{ backgroundColor: g.color, width: `${pct}%` }}
                         />
                       </div>
                     </li>
@@ -425,19 +393,14 @@ export default function Dashboard({ onNavigate }: { onNavigate: (tab: TabKey) =>
                 })}
               </ul>
             )}
-          </motion.section>
+          </section>
         </div>
       </div>
 
       {/* ─── نقل‌قول روز ─── */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.28 }}
-        className="rounded-3xl border border-dashed border-orange-200 bg-orange-50/60 px-5 py-4 text-center dark:border-orange-500/25 dark:bg-orange-500/10"
-      >
+      <div className="anim-enter-fade anim-delay-6 rounded-3xl border border-dashed border-orange-200 bg-orange-50/60 px-5 py-4 text-center dark:border-orange-500/25 dark:bg-orange-500/10">
         <p className="text-sm font-bold text-orange-800 dark:text-orange-200">«{quote}»</p>
-      </motion.div>
+      </div>
     </div>
   );
 }

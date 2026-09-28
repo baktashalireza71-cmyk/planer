@@ -9,7 +9,6 @@
  */
 
 import { useState } from "react";
-import { motion } from "framer-motion";
 import { Megaphone, ExternalLink, MessageCircleHeart, X } from "lucide-react";
 import { useAppConfig, buildContactUrl } from "@/lib/app-config-context";
 
@@ -25,12 +24,7 @@ export function AdBanner() {
   const showImage = Boolean(config.adImage) && !imageBroken;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="relative min-w-0 overflow-hidden rounded-3xl bg-gradient-to-bl from-amber-500 via-orange-500 to-rose-500 p-5 text-white shadow-xl shadow-amber-500/25 sm:p-6"
-    >
+    <section className="anim-enter relative min-w-0 overflow-hidden rounded-3xl bg-gradient-to-bl from-amber-500 via-orange-500 to-rose-500 p-5 text-white shadow-xl shadow-amber-500/25 sm:p-6">
       <div aria-hidden className="pointer-events-none absolute -top-10 -left-10 h-36 w-36 rounded-full bg-white/15 blur-2xl" />
       <div aria-hidden className="pointer-events-none absolute -bottom-12 right-1/4 h-40 w-40 rounded-full bg-rose-300/25 blur-2xl" />
 
@@ -76,7 +70,7 @@ export function AdBanner() {
           </a>
         </div>
       )}
-    </motion.section>
+    </section>
   );
 }
 
@@ -103,12 +97,7 @@ export function WelcomeContactCard() {
   if (!config.welcomeText && !contactUrl) return null;
 
   return (
-    <motion.section
-      initial={{ opacity: 0, y: 12 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, ease: "easeOut" }}
-      className="relative min-w-0 overflow-hidden rounded-3xl bg-gradient-to-bl from-violet-500 via-purple-500 to-fuchsia-500 p-5 text-white shadow-xl shadow-violet-500/25 sm:p-6"
-    >
+    <section className="anim-enter relative min-w-0 overflow-hidden rounded-3xl bg-gradient-to-bl from-violet-500 via-purple-500 to-fuchsia-500 p-5 text-white shadow-xl shadow-violet-500/25 sm:p-6">
       <div aria-hidden className="pointer-events-none absolute -top-10 -left-10 h-36 w-36 rounded-full bg-white/15 blur-2xl" />
       <div aria-hidden className="pointer-events-none absolute -bottom-12 left-1/3 h-40 w-40 rounded-full bg-fuchsia-300/25 blur-2xl" />
 
@@ -149,6 +138,6 @@ export function WelcomeContactCard() {
           </a>
         </div>
       )}
-    </motion.section>
+    </section>
   );
 }

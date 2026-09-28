@@ -159,7 +159,6 @@ export default function HabitsSection() {
                 <motion.li
                   key={habit.id}
                   layout
-                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, scale: 0.96 }}
                   className="rounded-3xl bg-card p-3 sm:p-5 card-glow"

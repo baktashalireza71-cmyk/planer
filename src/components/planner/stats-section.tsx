@@ -1,7 +1,6 @@
 "use client";
 
 import { useMemo } from "react";
-import { motion } from "framer-motion";
 import {
   BarChart3,
   CheckCircle2,
@@ -127,11 +126,7 @@ export default function StatsSection() {
 
           <div className="grid gap-5 lg:grid-cols-5">
             {/* نمودار هفتگی */}
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="lg:col-span-3 rounded-3xl bg-card p-5 card-glow"
-            >
+            <section className="anim-enter lg:col-span-3 rounded-3xl bg-card p-5 card-glow">
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-orange-100 text-orange-600 dark:bg-orange-500/15 dark:text-orange-300">
                   <TrendingUp className="h-4 w-4" />
@@ -180,15 +175,10 @@ export default function StatsSection() {
                   </BarChart>
                 </ResponsiveContainer>
               </div>
-            </motion.section>
+            </section>
 
             {/* نمودار دسته‌بندی‌ها */}
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.06 }}
-              className="lg:col-span-2 rounded-3xl bg-card p-5 card-glow"
-            >
+            <section className="anim-enter anim-delay-1 lg:col-span-2 rounded-3xl bg-card p-5 card-glow">
               <h3 className="mb-2 flex items-center gap-2 text-sm font-extrabold">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-teal-100 text-teal-600 dark:bg-teal-500/15 dark:text-teal-300">
                   <BarChart3 className="h-4 w-4" />
@@ -250,17 +240,12 @@ export default function StatsSection() {
                   </ul>
                 </>
               )}
-            </motion.section>
+            </section>
           </div>
 
           <div className="grid gap-5 lg:grid-cols-2">
             {/* اولویت‌ها */}
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.1 }}
-              className="rounded-3xl bg-card p-5 card-glow"
-            >
+            <section className="anim-enter anim-delay-2 rounded-3xl bg-card p-5 card-glow">
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-red-100 text-red-500 dark:bg-red-500/15 dark:text-red-400">
                   <Trophy className="h-4 w-4" />
@@ -279,27 +264,20 @@ export default function StatsSection() {
                         <span className="tabular-nums text-muted-foreground">{faNum(p.pending)} کار</span>
                       </div>
                       <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                        <motion.div
-                          initial={{ width: 0 }}
-                          animate={{ width: `${w}%` }}
-                          transition={{ duration: 0.8, ease: "easeOut" }}
-                          className="h-full rounded-full"
-                          style={{ backgroundColor: info.dot }}
+                        {/* پر شدن نوار با CSS خالص */}
+                        <div
+                          className="anim-bar h-full rounded-full"
+                          style={{ backgroundColor: info.dot, width: `${w}%` }}
                         />
                       </div>
                     </li>
                   );
                 })}
               </ul>
-            </motion.section>
+            </section>
 
             {/* ثبات عادت‌ها */}
-            <motion.section
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.14 }}
-              className="rounded-3xl bg-card p-5 card-glow"
-            >
+            <section className="anim-enter anim-delay-3 rounded-3xl bg-card p-5 card-glow">
               <h3 className="mb-4 flex items-center gap-2 text-sm font-extrabold">
                 <span className="flex h-8 w-8 items-center justify-center rounded-xl bg-pink-100 text-pink-600 dark:bg-pink-500/15 dark:text-pink-300">
                   <Flame className="h-4 w-4" />
@@ -329,12 +307,10 @@ export default function StatsSection() {
                           </span>
                         </div>
                         <div className="h-2.5 overflow-hidden rounded-full bg-muted">
-                          <motion.div
-                            initial={{ width: 0 }}
-                            animate={{ width: `${w}%` }}
-                            transition={{ duration: 0.8, ease: "easeOut" }}
-                            className="h-full rounded-full"
-                            style={{ backgroundColor: h.color }}
+                          {/* پر شدن نوار با CSS خالص */}
+                          <div
+                            className="anim-bar h-full rounded-full"
+                            style={{ backgroundColor: h.color, width: `${w}%` }}
                           />
                         </div>
                       </li>
@@ -342,16 +318,11 @@ export default function StatsSection() {
                   })}
                 </ul>
               )}
-            </motion.section>
+            </section>
           </div>
 
           {/* امتیاز کلی */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.2 }}
-            className="rounded-3xl bg-gradient-to-l from-teal-500 via-emerald-500 to-green-500 p-6 text-center text-white shadow-xl shadow-emerald-500/25"
-          >
+          <div className="anim-enter-fade anim-delay-4 rounded-3xl bg-gradient-to-l from-teal-500 via-emerald-500 to-green-500 p-6 text-center text-white shadow-xl shadow-emerald-500/25">
             <p className="text-xs font-bold text-emerald-50">امتیاز بهره‌وری این هفته</p>
             <p className="mt-1 text-4xl font-black">
               {faNum(
@@ -371,7 +342,7 @@ export default function StatsSection() {
             <p className="mt-2 text-xs text-emerald-50/90">
               با تکمیل کارها و عادت‌ها این امتیاز رو بالاتر ببر!
             </p>
-          </motion.div>
+          </div>
         </>
       )}
     </div>

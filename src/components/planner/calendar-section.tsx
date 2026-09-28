@@ -169,11 +169,7 @@ export default function CalendarSection() {
       {/* min-w-0: جلوگیری از سرریز افقی در موبایل — آیتم‌های گرید بدون آن کوچک نمی‌شوند */}
       <div className="grid gap-5 min-w-0 lg:grid-cols-3">
         {/* ─── شبکه ماه ─── */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="lg:col-span-2 min-w-0 rounded-3xl bg-card p-3 sm:p-6 card-glow"
-        >
+        <section className="anim-enter lg:col-span-2 min-w-0 rounded-3xl bg-card p-3 sm:p-6 card-glow">
           <div className="mb-4 flex items-center justify-between">
             <Button variant="ghost" size="icon" onClick={() => shiftMonth(-1)} aria-label="ماه قبل" className="rounded-xl hover:bg-purple-50 dark:hover:bg-purple-500/15 hover:text-purple-600 dark:hover:text-purple-300">
               <ChevronRight className="h-5 w-5" />
@@ -279,15 +275,10 @@ export default function CalendarSection() {
               <span className="h-2 w-2 rounded-full bg-red-400" /> تعطیل رسمی
             </span>
           </div>
-        </motion.section>
+        </section>
 
         {/* ─── پنل روز انتخابی ─── */}
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.06 }}
-          className="min-w-0 rounded-3xl bg-card p-4 sm:p-5 card-glow"
-        >
+        <section className="anim-enter anim-delay-1 min-w-0 rounded-3xl bg-card p-4 sm:p-5 card-glow">
           <div className="mb-4 flex items-center justify-between gap-2">
             <h3 className="min-w-0 truncate font-extrabold text-[15px]">{formatJalaliFull(selected)}</h3>
             <div className="flex shrink-0 items-center gap-1.5">
@@ -342,7 +333,6 @@ export default function CalendarSection() {
                         <motion.li
                           key={e.id}
                           layout
-                          initial={{ opacity: 0, x: 8 }}
                           animate={{ opacity: 1, x: 0 }}
                           exit={{ opacity: 0, scale: 0.95 }}
                           className="group flex items-center gap-2.5 rounded-2xl bg-background/70 border border-border/60 p-2.5"
@@ -432,7 +422,7 @@ export default function CalendarSection() {
               ))}
             </ul>
           </div>
-        </motion.section>
+        </section>
       </div>
 
       {/* ─── دیالوگ رویداد ─── */}

@@ -247,3 +247,86 @@ aside,
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ─────────────────────────────────────────────
+   انیمیشن ورود فقط با CSS — بدون نیاز به جاوااسکریپت
+   محتوا بلافاصله بعد از لود شدن CSS نمایان می‌شود، حتی قبل از
+   hydrate شدن جاوااسکریپت (رفع صفحه سفید روی موبایل/شبکه کند)
+   ───────────────────────────────────────────── */
+@keyframes anim-enter-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes anim-enter-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes anim-enter-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@keyframes anim-bar-grow {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+.anim-enter {
+  animation: anim-enter-up 0.35s ease-out both;
+}
+.anim-enter-fade {
+  animation: anim-enter-fade 0.4s ease-out both;
+}
+.anim-enter-scale {
+  animation: anim-enter-scale 0.35s ease-out both;
+}
+/* نوار پیشرفت: از راست (RTL) پر می‌شود */
+.anim-bar {
+  animation: anim-bar-grow 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  transform-origin: 100% 50%;
+}
+.anim-delay-1 {
+  animation-delay: 0.06s;
+}
+.anim-delay-2 {
+  animation-delay: 0.1s;
+}
+.anim-delay-3 {
+  animation-delay: 0.14s;
+}
+.anim-delay-4 {
+  animation-delay: 0.2s;
+}
+.anim-delay-5 {
+  animation-delay: 0.24s;
+}
+.anim-delay-6 {
+  animation-delay: 0.28s;
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-enter,
+  .anim-enter-fade,
+  .anim-enter-scale,
+  .anim-bar {
+    animation-duration: 0.01ms;
+    animation-delay: 0s;
+  }
+}

@@ -245,11 +245,9 @@ function DailyFal() {
       {!mf || !fal ? (
         <BirthMonthInvite onPick={pickBirthMonth} />
       ) : (
-        <motion.div
+        <div
           key={mf.month}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="min-w-0 rounded-3xl bg-card p-4 card-glow sm:p-6"
+          className="anim-enter min-w-0 rounded-3xl bg-card p-4 card-glow sm:p-6"
         >
           {/* سربرگ: ایموجی برج + عنوان + کپی */}
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
@@ -299,14 +297,12 @@ function DailyFal() {
 
           {/* متن فال */}
           <div className="mt-4 min-w-0 rounded-2xl border border-border/60 bg-secondary/50 p-4">
-            <motion.p
+            <p
               key={`${mf.month}-${fal.index}`}
-              initial={{ opacity: 0, y: 6 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="text-[15px] font-medium leading-8 text-foreground sm:text-base sm:leading-9"
+              className="anim-enter text-[15px] font-medium leading-8 text-foreground sm:text-base sm:leading-9"
             >
               {fal.text}
-            </motion.p>
+            </p>
           </div>
 
           {/* چیپ‌های عدد و رنگ شانس */}
@@ -332,7 +328,7 @@ function DailyFal() {
               </button>
             )}
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* فال همه ماه‌ها */}
@@ -679,11 +675,9 @@ function DateConverter() {
       {outputs && outputs.length > 0 && (
         <div className="grid min-w-0 gap-3 sm:grid-cols-2">
           {outputs.map((o) => (
-            <motion.div
+            <div
               key={`${src}-${o.key}`}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="min-w-0 rounded-3xl bg-card p-4 card-glow sm:p-5"
+              className="anim-enter min-w-0 rounded-3xl bg-card p-4 card-glow sm:p-5"
             >
               <div className="flex items-center gap-2 text-violet-500">
                 <ArrowLeftRight className="h-4 w-4" />
@@ -693,7 +687,7 @@ function DateConverter() {
                 {o.line1}
               </p>
               <p className="text-sm font-bold text-muted-foreground">{o.line2}</p>
-            </motion.div>
+            </div>
           ))}
         </div>
       )}

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Home,
   ListTodo,
@@ -189,15 +189,9 @@ export default function AppShell() {
             </div>
           </header>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={tab}
-              initial={{ opacity: 0, y: 14 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.22, ease: "easeOut" }}
-              className="mx-auto max-w-5xl"
-            >
+          {/* ورود تب‌ها با CSS خالص — محتوا حتی قبل از hydrate شدن جاوااسکریپت نمایان است
+              (رفع صفحه سفید روی موبایل‌های کند/شبکه ضعیف؛ key={tab} انیمیشن را هربار دوباره اجرا می‌کند) */}
+          <div key={tab} className="anim-enter mx-auto max-w-5xl">
               {tab === "dashboard" && <Dashboard onNavigate={setTab} />}
               {tab === "tasks" && <TasksSection />}
               {tab === "calendar" && <CalendarSection />}
@@ -207,8 +201,7 @@ export default function AppShell() {
               {tab === "goals" && <GoalsSection />}
               {tab === "notes" && <NotesSection />}
               {tab === "stats" && <StatsSection />}
-            </motion.div>
-          </AnimatePresence>
+          </div>
         </main>
       </div>
 
