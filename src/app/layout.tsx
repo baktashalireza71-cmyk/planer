@@ -1,14 +1,25 @@
 import type { Metadata, Viewport } from "next";
-import { Vazirmatn } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
 import { Providers } from "@/components/providers";
 
-const vazir = Vazirmatn({
+/**
+ * فونت وزیرمتن به‌صورت لوکال (باندل‌شده) — نه از Google Fonts
+ * مزیت: بیلد استاتیک بدون اینترنت کار می‌کند + اپ اندروید آفلاین فونت دارد
+ * (منبع: پکیج vazirmatn — مجوز OFL)
+ */
+const vazir = localFont({
   variable: "--font-vazir",
-  subsets: ["arabic", "latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
   display: "swap",
+  src: [
+    { path: "./fonts/Vazirmatn-Regular.woff2", weight: "400", style: "normal" },
+    { path: "./fonts/Vazirmatn-Medium.woff2", weight: "500", style: "normal" },
+    { path: "./fonts/Vazirmatn-SemiBold.woff2", weight: "600", style: "normal" },
+    { path: "./fonts/Vazirmatn-Bold.woff2", weight: "700", style: "normal" },
+    { path: "./fonts/Vazirmatn-ExtraBold.woff2", weight: "800", style: "normal" },
+    { path: "./fonts/Vazirmatn-Black.woff2", weight: "900", style: "normal" },
+  ],
 });
 
 export const metadata: Metadata = {

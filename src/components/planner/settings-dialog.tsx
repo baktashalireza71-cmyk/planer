@@ -59,6 +59,7 @@ import {
   requestNativePermission,
 } from "@/lib/native-bridge";
 import { cn } from "@/lib/utils";
+import { ENABLE_ADMIN_PANEL } from "@/lib/constants";
 import AdminPanel from "./admin-panel";
 
 /** قرارداد Task 5-a — عیناً همان کلید/رویداد fal-section */
@@ -123,7 +124,7 @@ export default function SettingsDialog({
             <NotificationsSection />
             <BirthMonthSection />
             <SupportSection />
-            <AdminSection />
+            {ENABLE_ADMIN_PANEL && <AdminSection />}
             <PrivacySection />
             <AboutSection />
           </div>

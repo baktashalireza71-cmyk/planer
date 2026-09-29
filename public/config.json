@@ -1,0 +1,28 @@
+{
+  "_راهنما": [
+    "این فایل تنظیمات مرکزی برنامه «پلنر من» است — مستقیم ویرایشش کن و push کن!",
+    "با هر تغییر در این فایل و اجرای دوباره workflow، نسخه جدید اپ ساخته می‌شود.",
+    "adsEnabled: true = بنر تبلیغ نمایش داده می‌شود | false = هیچ تبلیغی نیست",
+    "adTitle / adText: عنوان و متن بنر تبلیغ",
+    "adImage: مسیر عکس بنر — عکس را در پوشه public/ads آپلود کن و مسیرش را بنویس (مثال: ads/banner.png) — خالی = بدون عکس",
+    "adButtonText: متن دکمه بنر | adLink: لینکی که دکمه باز می‌کند",
+    "contactChannel: یکی از WHATSAPP یا TELEGRAM یا BALE یا NONE",
+    "contactTarget: شماره واتساپ (با +) یا آیدی تلگرام/بله بدون @",
+    "contactMessage: متن آماده پیام (اختیاری)",
+    "welcomeText: پیام خوشامد که یک بار به همه کاربران نشان داده می‌شود — خالی = غیرفعال",
+    "welcomeVersion: هر بار عددش را +1 کنی، کارت خوشامد دوباره برای همه نمایش داده می‌شود",
+    "remoteConfigUrl: (پیشرفته) آدرس اینترنتی یک config.json دیگر برای آپدیت بدون انتشار نسخه جدید — خالی بگذار"
+  ],
+  "adsEnabled": false,
+  "adTitle": "",
+  "adText": "",
+  "adImage": null,
+  "adButtonText": "مشاهده",
+  "adLink": "",
+  "contactChannel": "NONE",
+  "contactTarget": "",
+  "contactMessage": "",
+  "welcomeText": "",
+  "welcomeVersion": 1,
+  "remoteConfigUrl": ""
+}

@@ -3,10 +3,14 @@
 /**
  * کانتکست تنظیمات مرکزی برنامه (کانفیگ عمومی)
  * ------------------------------------------------
- * تنظیمات تبلیغ/ارتباط از سرور (/api/app-config) خوانده می‌شود
+ * تنظیمات تبلیغ/ارتباط از فایل استاتیک /config.json خوانده می‌شود
+ * (برنامه کاملاً بدون سرور است — این فایل داخل اپ/سایت باندل شده)
  * و برای استفاده آفلاین در localStorage کش می‌شود:
  *  - اگر تبلیغ فعال باشد بنر نمایش داده می‌شود، وگرنه هیچ اثری از آن نیست
  *  - کارت خوشامد تا زمانی که کاربر آن را نبندد (یا نسخه جدیدی منتشر شود) نمایش داده می‌شود
+ *
+ * آپدیت از راه دور (اختیاری): اگر فایل کانفیگ، remoteConfigUrl داشته باشد،
+ * اول از آن آدرس خوانده می‌شود؛ در خطا به نسخه باندل‌شده برمی‌گردیم.
  *
  * امنیت: این فایل فقط فیلدهای «عمومی» را نگه می‌دارد؛
  * هیچ راز یا اطلاعات مدیریتی از این مسیر عبور نمی‌کند.
@@ -25,7 +29,7 @@ import {
 /** کانال‌های ارتباطی پشتیبانی‌شده */
 export type ContactChannel = "WHATSAPP" | "TELEGRAM" | "BALE" | "NONE";
 
-/** تنظیمات عمومی برنامه (خروجی عمومی /api/app-config) */
+/** تنظیمات عمومی برنامه (محتوای public/config.json) */
 export interface AppConfig {
   adsEnabled: boolean;
   adTitle: string;
@@ -39,6 +43,8 @@ export interface AppConfig {
   welcomeText: string;
   /** با هر بار افزایش، کارت خوشامد برای همه کاربران دوباره نمایش داده می‌شود */
   welcomeVersion: number;
+  /** (اختیاری، پیشرفته) آدرس یک config.json راه‌دور برای آپدیت بدون انتشار نسخه جدید */
+  remoteConfigUrl?: string;
 }
 
 /** تنظیمات پیش‌فرض (مطابق مقادیر اولیه دیتابیس) */
@@ -97,6 +103,21 @@ interface AppConfigContextValue {
   dismissWelcome: () => void;
 }
 
+/** نرمال‌سازی خروجی config.json (شیء تخت یا wrapped در config) به AppConfig */
+function normalizeConfig(raw: unknown): AppConfig | null {
+  if (!raw || typeof raw !== "object") return null;
+  const obj = raw as Record<string, unknown>;
+  const source =
+    obj.config && typeof obj.config === "object"
+      ? (obj.config as Record<string, unknown>)
+      : obj;
+  if (typeof source.adsEnabled !== "boolean") return null;
+  return { ...DEFAULT_CONFIG, ...source } as AppConfig;
+}
+
+/** آدرس فایل کانفیگ داخلی (باندل‌شده در اپ/سایت) */
+const BUNDLED_CONFIG_URL = "/config.json";
+
 const AppConfigContext = createContext<AppConfigContextValue | null>(null);
 
 const emptySubscribe = () => () => {};
@@ -113,29 +134,45 @@ export function AppConfigProvider({ children }: { children: React.ReactNode }) {
     () => false
   );
 
-  const refresh = useCallback(async () => {
+  /** واکشی از یک آدرس؛ در موفقیت config نرمال‌شده، وگرنه null */
+  const fetchConfigFrom = useCallback(async (url: string): Promise<AppConfig | null> => {
     try {
-      const res = await fetch("/api/app-config", { cache: "no-store" });
-      if (res.ok) {
-        const data = (await res.json()) as { config?: Partial<AppConfig> };
-        if (data?.config) {
-          const merged = { ...DEFAULT_CONFIG, ...data.config } as AppConfig;
-          setConfig(merged);
-          try {
-            localStorage.setItem(APP_CONFIG_CACHE_KEY, JSON.stringify(merged));
-          } catch {
-            /* حافظه در دسترس نیست — بی‌اهمیت */
-          }
-        }
-      }
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) return null;
+      return normalizeConfig(await res.json());
     } catch {
-      // بدون اینترنت: آخرین کانفیگ کش‌شده باقی می‌ماند
-    } finally {
-      setIsReady(true);
+      return null;
     }
   }, []);
 
-  // خواندن اولیه: کش محلی + نسخه خوشامد دیده‌شده، سپس واکشی از سرور
+  const refresh = useCallback(async () => {
+    try {
+      const bundled = await fetchConfigFrom(BUNDLED_CONFIG_URL);
+      let merged = bundled;
+
+      // کانفیگ راه‌دور (اگر در فایل باندل‌شده ست شده باشد) — اولویت با آن است
+      const remoteUrl = bundled?.remoteConfigUrl?.trim();
+      if (remoteUrl) {
+        const remote = await fetchConfigFrom(
+          remoteUrl + (remoteUrl.includes("?") ? "&" : "?") + "t=" + Date.now()
+        );
+        if (remote) merged = remote;
+      }
+
+      if (merged) {
+        setConfig(merged);
+        try {
+          localStorage.setItem(APP_CONFIG_CACHE_KEY, JSON.stringify(merged));
+        } catch {
+          /* حافظه در دسترس نیست — بی‌اهمیت */
+        }
+      }
+    } finally {
+      setIsReady(true);
+    }
+  }, [fetchConfigFrom]);
+
+  // خواندن اولیه: کش محلی + نسخه خوشامد دیده‌شده، سپس واکشی config.json
   useEffect(() => {
     let alive = true;
     (async () => {

@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
     inputs:
       server_url:
-        description: "آدرس سایت منتشرشده (https://… ) — خالی بگذار = همان مقدار داخل capacitor.config.ts"
+        description: "(اختیاری) آدرس سایت برای حالت سروردار — خالی = اپ کاملاً آفلاین"
         required: false
         default: ""
       version_name:
@@ -51,7 +51,10 @@ jobs:
       - name: پذیرش لایسنس‌های Android SDK
         run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
 
-      - name: تنظیم آدرس سرور
+      - name: ساخت نسخه استاتیک وب (داخل خود اپ باندل می‌شود)
+        run: bun run build:static
+
+      - name: تنظیم آدرس سرور (اختیاری — برای حالت سروردار)
         if: ${{ inputs.server_url != '' }}
         run: node scripts/patch-server-url.js "${{ inputs.server_url }}"
 
