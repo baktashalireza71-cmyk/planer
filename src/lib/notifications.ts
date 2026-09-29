@@ -14,7 +14,13 @@
 import { useEffect, useRef } from "react";
 import { toast } from "sonner";
 import { dayKey, nextOccurrenceDate, faNum } from "@/lib/date";
-import { tasksStore, habitsStore, eventsStore, goalsStore, notifPrefsStore } from "@/lib/local-store";
+import { tasksStore, habitsStore, eventsStore, goalsStore, notifPrefsStore, NOTIF_PREFS_EVENT } from "@/lib/local-store";
+import {
+  isNativeApp,
+  getNativePermissionState,
+  requestNativePermission,
+  syncNativeReminders,
+} from "@/lib/native-bridge";
 
 // ─────────────────────────────────────────────
 //  انواع
@@ -199,7 +205,10 @@ export function pushBrowserNotification(title: string, body: string): boolean {
 
 // ─────────────────────────────────────────────
 //  زمان‌بند — یادآور روزانه + اعلان کارها
-//  (هر ۳۰ ثانیه بررسی می‌کند؛ هر اعلان حداکثر یک بار در روز)
+//  ── روی وب: هر ۳۰ ثانیه وقتی برنامه باز است بررسی می‌کند
+//  ── روی اندروید (APK): علاوه بر آن، یادآور سیستمی ثبت می‌کند که
+//     حتی وقتی برنامه کاملاً بسته است در ساعت مقرر نمایش داده می‌شود
+//  هر اعلان حداکثر یک بار در روز
 // ─────────────────────────────────────────────
 const CHECK_INTERVAL_MS = 30_000;
 
@@ -207,6 +216,27 @@ export function useNotificationScheduler() {
   const timer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
+
+    // ── اندروید: ثبت/به‌روزرسانی یادآور سیستمی مطابق تنظیمات ──
+    const syncNative = async () => {
+      if (isNativeApp()) await syncNativeReminders(notifPrefsStore.get());
+    };
+
+    (async () => {
+      await Promise.resolve(); // قطع مسیر همگام
+      if (cancelled) return;
+      if (isNativeApp()) {
+        // درخواست مجوز در اولین اجرا (اندروید ۱۳+)
+        const state = await getNativePermissionState();
+        if (state === "prompt") await requestNativePermission();
+        await syncNative();
+      }
+    })();
+
+    // با هر تغییر تنظیمات اعلان‌ها، زمان‌بندی سیستمی اندروید دوباره ثبت می‌شود
+    window.addEventListener(NOTIF_PREFS_EVENT, syncNative);
+
     const check = () => {
       const now = new Date();
       const today = dayKey(now);
@@ -245,7 +275,9 @@ export function useNotificationScheduler() {
     const t0 = setTimeout(check, 2500);
     timer.current = setInterval(check, CHECK_INTERVAL_MS);
     return () => {
+      cancelled = true;
       clearTimeout(t0);
+      window.removeEventListener(NOTIF_PREFS_EVENT, syncNative);
       if (timer.current) clearInterval(timer.current);
     };
   }, []);

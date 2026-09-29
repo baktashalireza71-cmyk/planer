@@ -85,18 +85,17 @@ git push -u origin main
 
 ### مرحله ۳ — تبدیل به فایل APK (اندروید)
 
-برای بازار باید فایل APK/AAB بسازیم. بهترین راه، **Capacitor** است:
+همه‌چیز از قبل آماده است: پکیج‌های Capacitor نصب شده‌اند، `capacitor.config.ts` ساخته شده، اعلان‌های سیستمی اندروید (`@capacitor/local-notifications`) کد شده و فایل‌های آیکون/اسپلش در `assets/` هستند.
+
+**فقط کافی است** آدرس سایتت را در `capacitor.config.ts` بگذاری و این دستورات را بزنی:
 
 ```bash
-npm install @capacitor/core @capacitor/cli @capacitor/android
-npx cap init "پلنر من" com.yourname.planner --web-dir=public
-
-# آدرس سایت منتشرشده را به‌عنوان سرور اپ معرفی کنید
-# (در capacitor.config.ts مقدار server.url را تنظیم کنید)
-
 npx cap add android
-npx cap open android   # باز شدن در Android Studio → Build APK
+npx cap sync
+npx cap open android   # در Android Studio: Run ▶ یا Build APK
 ```
+
+📖 **راهنمای کامل قدم‌به‌قدم (با تصویر، امضا و عیب‌یابی): [docs/APK-GUIDE.md](docs/APK-GUIDE.md)**
 
 نیازمندی: Android Studio روی کامپیوتر شما.
 

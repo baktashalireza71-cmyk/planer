@@ -53,6 +53,11 @@ import {
   notificationPermission,
   notificationsSupported,
 } from "@/lib/notifications";
+import {
+  isNativeApp,
+  getNativePermissionState,
+  requestNativePermission,
+} from "@/lib/native-bridge";
 import { cn } from "@/lib/utils";
 import AdminPanel from "./admin-panel";
 
@@ -193,7 +198,7 @@ function ThemeSection() {
 // ─────────────────────────────────────────────
 function NotificationsSection() {
   const [prefs, setPrefs] = useState<NotifPrefs>(defaultNotifPrefs);
-  const [perm, setPerm] = useState<NotificationPermission | "unsupported">("default");
+  const [perm, setPerm] = useState<NotificationPermission | "unsupported" | "prompt">("default");
   const [loaded, setLoaded] = useState(false);
 
   // این بخش فقط هنگام باز شدن دیالوگ mount می‌شود — هر بار تازه خوانده می‌شود
@@ -203,7 +208,8 @@ function NotificationsSection() {
       await Promise.resolve(); // قطع مسیر همگام (سازگار با قواعد lint)
       if (!alive) return;
       setPrefs(notifPrefsStore.get());
-      setPerm(notificationPermission());
+      // در اپ اندروید وضعیت مجوز از پل Capacitor خوانده می‌شود
+      setPerm(isNativeApp() ? await getNativePermissionState() : notificationPermission());
       setLoaded(true);
     })();
     return () => {
@@ -217,6 +223,12 @@ function NotificationsSection() {
   };
 
   const askPermission = async () => {
+    if (isNativeApp()) {
+      const ok = await requestNativePermission();
+      setPerm(ok ? "granted" : "denied");
+      toast[ok ? "success" : "error"](ok ? "اعلان‌های اندروید فعال شد 🔔" : "مجوز اعلان داده نشد");
+      return;
+    }
     const result = await requestNotificationPermission();
     setPerm(result);
     if (result === "granted") {
@@ -287,20 +299,24 @@ function NotificationsSection() {
             />
           </div>
 
-          {/* مجوز اعلان مرورگر */}
+          {/* مجوز اعلان سیستمی */}
           <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/60 p-3 dark:border-orange-500/20 dark:bg-orange-500/5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <div className="min-w-0">
-                <p className="text-[11px] font-extrabold">اعلان سیستمی مرورگر</p>
+                <p className="text-[11px] font-extrabold">{isNativeApp() ? "اعلان سیستمی اندروید" : "اعلان سیستمی مرورگر"}</p>
                 <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground">
                   {perm === "granted"
-                    ? "فعال است ✅ — اعلان‌ها بیرون از برنامه هم نمایش داده می‌شوند."
+                    ? isNativeApp()
+                      ? "فعال است ✅ — یادآورها حتی وقتی برنامه بسته است می‌آیند."
+                      : "فعال است ✅ — اعلان‌ها بیرون از برنامه هم نمایش داده می‌شوند."
                     : perm === "denied"
-                      ? "مسدود شده — از تنظیمات مرورگر سایت را در فهرست مجازها بگذار."
+                      ? isNativeApp()
+                        ? "مسدود شده — از تنظیمات گوشی ← برنامه ← مجوزها فعالش کن."
+                        : "مسدود شده — از تنظیمات مرورگر سایت را در فهرست مجازها بگذار."
                       : "برای نمایش اعلان بیرون از برنامه، اجازه بده."}
                 </p>
               </div>
-              {notificationsSupported() && perm === "default" ? (
+              {perm === "default" || (isNativeApp() && perm === "prompt") ? (
                 <Button
                   size="sm"
                   onClick={askPermission}
@@ -309,12 +325,14 @@ function NotificationsSection() {
                   <Bell className="h-3.5 w-3.5" />
                   فعال‌سازی
                 </Button>
-              ) : !notificationsSupported() ? (
+              ) : !notificationsSupported() && !isNativeApp() ? (
                 <span className="shrink-0 text-[10px] font-bold text-muted-foreground">پشتیبانی نمی‌شود</span>
               ) : null}
             </div>
             <p className="mt-2 text-[10px] leading-relaxed text-orange-900/60 dark:text-orange-200/60">
-              یادآورها وقتی برنامه باز است نمایش داده می‌شوند؛ در نسخه اندروید (بازار) یادآور واقعی و دقیق فعال خواهد شد.
+              {isNativeApp()
+                ? "یادآورها با زمان‌بندی سیستمی اندروید فعال‌اند — حتی وقتی برنامه بسته است."
+                : "یادآورها وقتی برنامه باز است نمایش داده می‌شوند؛ در نسخه اندروید (بازار) یادآور واقعی و دقیق فعال خواهد شد."}
             </p>
           </div>
         </div>
