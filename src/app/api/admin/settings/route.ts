@@ -28,6 +28,9 @@ const LIMITS = {
 // لینک‌ها فقط http/https (جلوی javascript: و data: گرفته می‌شود)
 const HTTP_URL = /^https?:\/\//;
 
+// تصویر آپلودشده از مسیر داخلی API هم پذیرفته می‌شود (خروجی POST /api/admin/upload)
+const LOCAL_UPLOAD = /^\/api\/uploads\/ad-[a-z0-9]+-[a-f0-9]{12}\.(jpg|png|webp|gif)$/;
+
 // ─────────────────────────────────────────────
 //  GET /api/admin/settings — تنظیمات کامل برای پنل مدیر (نیازمند سشن)
 // ─────────────────────────────────────────────
@@ -96,8 +99,13 @@ export async function PUT(req: Request) {
       return jsonError("adLink must start with http:// or https://", 400);
     const adImage =
       typeof body.adImage === "string" ? body.adImage.trim() : body.adImage;
-    if (typeof adImage === "string" && adImage !== "" && !HTTP_URL.test(adImage))
-      return jsonError("adImage must start with http:// or https://", 400);
+    if (
+      typeof adImage === "string" &&
+      adImage !== "" &&
+      !HTTP_URL.test(adImage) &&
+      !LOCAL_UPLOAD.test(adImage)
+    )
+      return jsonError("adImage must start with http:// or https:// or be an uploaded path (/api/uploads/…)", 400);
 
     // ── contactTarget مطابق کانال انتخابی ──
     const contactTarget = (body.contactTarget as string).trim();

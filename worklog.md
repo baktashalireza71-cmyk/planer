@@ -496,3 +496,22 @@ Stage Summary:
 - 关键技巧（供后续 agent 参考）：在本沙箱中重启 dev 服务器必须用双重 fork：
   python3 -c "import os,sys; pid=os.fork(); sys.exit(0) if pid>0 else None; os.setsid(); pid2=os.fork(); sys.exit(0) if pid2>0 else None; os.chdir('/home/z/my-project'); log=os.open('dev.log',os.O_WRONLY|os.O_CREAT|os.O_TRUNC); os.dup2(log,1); os.dup2(log,2); dn=os.open('/dev/null',os.O_RDONLY); os.dup2(dn,0); os.execvp('bun',['bun','run','dev'])"
 - 应用状态：完全正常，所有页面/交互/移动端/主题验证通过，可正常预览
+
+---
+Task ID: 8
+Agent: Z.ai Code (main)
+Task: 广告图片从「链接输入」改为「直接上传」+ 回答剩余任务清单
+
+Work Log:
+- 新增 POST /api/admin/upload：管理员会话鉴权、multipart/form-data、魔数字节验证（JPG/PNG/WebP/GIF，防伪造文件 XSS）、上限 2MB、随机安全文件名，存储到 db/uploads/（public 之外，生产 standalone 下也可用）
+- 新增 GET /api/uploads/[name]：严格正则白名单文件名（防 path traversal）、正确 Content-Type + nosniff + immutable 缓存
+- PUT /api/admin/settings：adImage 验证扩展为接受 http(s) 链接或 /api/uploads/ad-… 内部路径
+- admin-panel.tsx：删除「لینک تصویر」输入框，替换为上传控件——空状态：虚线边框大按钮「انتخاب تصویر از گالری」（h-24 触达面积）；已上传状态：缩略图预览 + 文件名 + «تغییر تصویر»/«حذف» 按钮；上传中 Loader2 + 禁用；客户端预校验类型/2MB；401/413/415 分别友好提示
+- 验证（curl）：无会话 401、登录后上传 200、服务图片 200 image/png、路径穿越/非法名 404、HTML 伪装 .png 415 拒绝、PUT 接受内部路径、公开 app-config 返回上传路径
+- 验证（agent-browser 端到端）：UI 登录 admin1404 → 预览已存图片 → حذف 切换空状态 → DataTransfer 注入真实文件触发 onChange → 上传成功预览更新 → «ذخیره تنظیمات» 出 toast «ذخیره شد ✅» → 移动端 390px 首页广告横幅正确显示上传图片，控制台零错误
+- 测试后清理：设置重置为 adsEnabled=false/adImage=null，删除测试图片，确认应用恢复干净状态
+
+Stage Summary:
+- 用户现在在管理面板直接从相册选图上传，无需任何外链；旧 http 链接值仍兼容显示
+- 技术要点：文件存 db/uploads + API 路由服务（而非 public/），保证 next dev 与生产 standalone 都能访问运行时上传的文件
+- 供后续 agent 注意：admin upload/upload-image 相关逻辑在 src/app/api/admin/upload、src/app/api/uploads/[name]，UI 在 admin-panel.tsx 的 «تصویر تبلیغ» Field

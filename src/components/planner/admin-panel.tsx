@@ -8,7 +8,7 @@
  * صدا زده می‌شود تا بنر تبلیغ/کارت خوشامد فوراً به‌روز شود.
  */
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import {
   Megaphone,
@@ -19,6 +19,8 @@ import {
   LogOut,
   Eye,
   KeyRound,
+  ImagePlus,
+  Trash2,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -81,8 +83,9 @@ function validate(s: {
   if (s.adButtonText.length > 40) return "متن دکمه تبلیغ حداکثر ۴۰ کاراکتر است";
   if (s.adLink && !/^https?:\/\/.+/i.test(s.adLink.trim()))
     return "لینک دکمه باید با http:// یا https:// شروع شود";
-  if (s.adImage && !/^https?:\/\/.+/i.test(s.adImage.trim()))
-    return "لینک تصویر باید با http:// یا https:// شروع شود";
+  // تصویر یا آپلود داخلی است یا لینک اینترنتی (فیلد دیگر دستی تایپ نمی‌شود)
+  if (s.adImage && !/^(https?:\/\/|\/api\/uploads\/)/i.test(s.adImage.trim()))
+    return "تصویر تبلیغ نامعتبر است — دوباره آپلودش کن";
   if (s.contactChannel === "NONE" && s.contactTarget.trim() !== "")
     return "با کانال «هیچ» نباید شناسه/شماره وارد شود";
   if (s.contactChannel === "WHATSAPP" && s.contactTarget.trim() !== "" && !/^\+?\d{6,20}$/.test(s.contactTarget.trim()))
@@ -128,6 +131,10 @@ export default function AdminPanel({
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPw, setChangingPw] = useState(false);
+
+  // ── آپلود تصویر تبلیغ ──
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const fillForm = useCallback((s: AdminSettings) => {
     setAdsEnabled(Boolean(s.adsEnabled));
@@ -284,6 +291,62 @@ export default function AdminPanel({
     toast("با ذخیره، کارت خوشامد برای همه کاربران دوباره نمایش داده می‌شود");
   };
 
+  // ── آپلود تصویر تبلیغ به سرور ──
+  const uploadImage = async (file: File) => {
+    if (!/^image\/(jpeg|png|webp|gif)$/i.test(file.type)) {
+      toast.error("فقط تصویر JPG، PNG، WebP یا GIF مجاز است");
+      return;
+    }
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error("حجم تصویر حداکثر ۲ مگابایت است");
+      return;
+    }
+    setUploading(true);
+    try {
+      const fd = new FormData();
+      fd.append("file", file);
+      const res = await fetch("/api/admin/upload", {
+        method: "POST",
+        body: fd,
+        credentials: "same-origin",
+      });
+      if (res.status === 401) {
+        toast.error("نشست مدیر منقضی شده؛ دوباره وارد شو");
+        onOpenChange(false);
+        return;
+      }
+      if (res.status === 413) {
+        toast.error("حجم تصویر حداکثر ۲ مگابایت است");
+        return;
+      }
+      if (res.status === 415) {
+        toast.error("فایل انتخابی تصویر معتبر نیست");
+        return;
+      }
+      if (!res.ok) {
+        toast.error("آپلود ناموفق بود؛ دوباره تلاش کن");
+        return;
+      }
+      const data = (await res.json().catch(() => ({}))) as { url?: string };
+      if (!data.url) {
+        toast.error("پاسخ سرور نامعتبر بود");
+        return;
+      }
+      setAdImage(data.url);
+      toast.success("تصویر آپلود شد ✅ یادت نره «ذخیره تنظیمات» را بزنی");
+    } catch {
+      toast.error("خطای شبکه در آپلود تصویر");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const onPickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = ""; // انتخاب دوباره همان فایل هم onChange را فعال کند
+    if (file) void uploadImage(file);
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent showCloseButton={false} className="max-w-2xl gap-0 overflow-hidden rounded-3xl p-0">
@@ -335,8 +398,78 @@ export default function AdminPanel({
                   <Field label="متن تبلیغ">
                     <Textarea value={adText} onChange={(e) => setAdText(e.target.value)} maxLength={500} rows={3} placeholder="توضیح کوتاه تبلیغ…" className="rounded-xl bg-background" />
                   </Field>
-                  <Field label="لینک تصویر (اختیاری)">
-                    <Input dir="ltr" value={adImage} onChange={(e) => setAdImage(e.target.value)} maxLength={500} placeholder="https://…" className="rounded-xl bg-background text-left text-xs" />
+                  <Field label="تصویر تبلیغ (اختیاری)" hint="مستقیم از گالری آپلود کن — JPG، PNG، WebP یا GIF، حداکثر ۲ مگابایت">
+                    <span className="sr-only" id="ad-image-status">
+                      {adImage ? "تصویر تبلیغ انتخاب شده است" : "تصویری انتخاب نشده است"}
+                    </span>
+                    {adImage ? (
+                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-amber-300/70 bg-amber-50/60 p-3 dark:border-amber-500/30 dark:bg-amber-500/5">
+                        <img
+                          src={adImage}
+                          alt="پیش‌نمایش تصویر تبلیغ"
+                          className="h-16 w-16 shrink-0 rounded-xl border border-border/60 object-cover shadow-sm sm:h-20 sm:w-20"
+                        />
+                        <div className="flex min-w-0 flex-1 flex-col gap-2">
+                          <p className="truncate text-[11px] font-bold text-muted-foreground" dir="ltr">
+                            {adImage.split("/").pop()}
+                          </p>
+                          <div className="flex flex-wrap gap-2">
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => fileInputRef.current?.click()}
+                              disabled={uploading}
+                              className="h-11 gap-1.5 rounded-full px-4 text-xs font-bold text-amber-600 dark:text-amber-300 hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-500/10 dark:hover:text-amber-200"
+                            >
+                              {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <ImagePlus className="h-3.5 w-3.5" />}
+                              تغییر تصویر
+                            </Button>
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setAdImage("")}
+                              disabled={uploading}
+                              className="h-11 gap-1.5 rounded-full px-4 text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive"
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                              حذف
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        disabled={uploading}
+                        aria-describedby="ad-image-status"
+                        className="flex h-24 w-full cursor-pointer flex-col items-center justify-center gap-1.5 rounded-2xl border-2 border-dashed border-amber-300/70 bg-amber-50/40 text-amber-600 transition-colors hover:bg-amber-50 hover:text-amber-700 disabled:cursor-not-allowed disabled:opacity-60 dark:border-amber-500/30 dark:bg-amber-500/5 dark:text-amber-300 dark:hover:bg-amber-500/10"
+                      >
+                        {uploading ? (
+                          <>
+                            <Loader2 className="h-6 w-6 animate-spin" />
+                            <span className="text-xs font-extrabold">در حال آپلود…</span>
+                          </>
+                        ) : (
+                          <>
+                            <ImagePlus className="h-6 w-6" />
+                            <span className="text-xs font-extrabold">انتخاب تصویر از گالری</span>
+                            <span className="text-[10px] font-medium text-muted-foreground">اینجا بزن و عکس تبلیغ را انتخاب کن</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp,image/gif"
+                      onChange={onPickFile}
+                      className="hidden"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                    />
                   </Field>
                   <div className="grid gap-3 sm:grid-cols-2">
                     <Field label="متن دکمه">
