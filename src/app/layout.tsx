@@ -16,6 +16,21 @@ export const metadata: Metadata = {
   description:
     "پلنر حرفه‌ای فارسی با کارها، تقویم شمسی، عادت‌ها، اهداف، یادداشت‌ها و آمار پیشرفت",
   keywords: ["پلنر", "برنامه‌ریزی", "کارها", "عادت", "تقویم شمسی", "planner"],
+  applicationName: "پلنر من",
+  manifest: "/manifest.webmanifest",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "پلنر من",
+  },
+  icons: {
+    icon: [
+      { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 export const viewport: Viewport = {
