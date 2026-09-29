@@ -40,14 +40,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-local-*
+/local-*
 .claude
 .z-ai-config
 *.log
 dev.log
 dev.out.log
-test
-prompt
+/test
+/prompt
 
 server.log
 # Skills directory
@@ -81,6 +81,7 @@ android/capacitor-cordova-android-plugins/build/
 android/local.properties
 android/.idea/
 android/captures/
+android/app/src/test/
 # signing secrets — never commit
 android/key.properties
 android/app/upload-keystore.jks
