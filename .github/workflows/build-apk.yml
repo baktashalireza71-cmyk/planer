@@ -1,0 +1,91 @@
+# ─────────────────────────────────────────────────────────────
+# ساخت خودکار APK اندروید — بدون نیاز به Android Studio!
+#
+# روش استفاده:
+#   1) کد را به گیت‌هاب push کن
+#   2) تب Actions → «ساخت APK اندروید» → Run workflow
+#   3) اگر سایتت را منتشر کرده‌ای، آدرسش را در server_url وارد کن
+#   4) بعد از اتمام، از همان ران، بخش Artifacts فایل APK را دانلود کن
+#
+# روی هر push به main هم خودکار اجرا می‌شود.
+# ─────────────────────────────────────────────────────────────
+name: ساخت APK اندروید
+
+on:
+  workflow_dispatch:
+    inputs:
+      server_url:
+        description: "آدرس سایت منتشرشده (https://… ) — خالی بگذار = همان مقدار داخل capacitor.config.ts"
+        required: false
+        default: ""
+      version_name:
+        description: "نام نسخه (مثلاً 1.0)"
+        required: false
+        default: ""
+      version_code:
+        description: "کد نسخه — عدد صحیح، هر انتشار جدید یکی بیشتر (مثلاً 2)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    steps:
+      - name: دریافت کد
+        uses: actions/checkout@v4
+
+      - name: نصب Bun
+        uses: oven-sh/setup-bun@v2
+
+      - name: نصب پکیج‌ها
+        run: bun install --frozen-lockfile
+
+      - name: نصب Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+
+      - name: پذیرش لایسنس‌های Android SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null 2>&1 || true
+
+      - name: تنظیم آدرس سرور
+        if: ${{ inputs.server_url != '' }}
+        run: node scripts/patch-server-url.js "${{ inputs.server_url }}"
+
+      - name: تنظیم شماره نسخه
+        if: ${{ inputs.version_name != '' || inputs.version_code != '' }}
+        run: node scripts/patch-version.js "${{ inputs.version_name }}" "${{ inputs.version_code }}"
+
+      - name: همگام‌سازی Capacitor
+        run: bunx cap sync android
+
+      - name: آماده‌سازی کلید امضا (در صورت وجود Secrets)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: bash scripts/prepare-keystore.sh
+
+      - name: ساخت APK (debug + release)
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug assembleRelease --no-daemon --stacktrace
+
+      - name: تغییر نام فایل‌های APK
+        run: |
+          mkdir -p apk-out
+          find android/app/build/outputs/apk -name "*.apk" -exec cp {} apk-out/ \;
+          ls -lh apk-out
+
+      - name: آپلود APKها (دانلود از بخش Artifacts)
+        uses: actions/upload-artifact@v4
+        with:
+          name: planner-man-apk
+          path: apk-out/*.apk
+          if-no-files-found: error
+          retention-days: 30

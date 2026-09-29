@@ -85,19 +85,16 @@ git push -u origin main
 
 ### مرحله ۳ — تبدیل به فایل APK (اندروید)
 
-همه‌چیز از قبل آماده است: پکیج‌های Capacitor نصب شده‌اند، `capacitor.config.ts` ساخته شده، اعلان‌های سیستمی اندروید (`@capacitor/local-notifications`) کد شده و فایل‌های آیکون/اسپلش در `assets/` هستند.
+همه‌چیز از قبل آماده است: پکیج‌های Capacitor نصب شده‌اند، `capacitor.config.ts` ساخته شده، اعلان‌های سیستمی اندروید (`@capacitor/local-notifications`) کد شده، **پروژه `android/` با آیکون‌ها و اسپلش تولید شده** و دو workflow گیت‌هاب اکشنز هم آماده‌اند.
 
-**فقط کافی است** آدرس سایتت را در `capacitor.config.ts` بگذاری و این دستورات را بزنی:
+**⚡ روش پیشنهادی — بدون Android Studio:** کد را به گیت‌هاب push کن؛ تب **Actions → «ساخت APK اندروید» → Run workflow** → بعد از چند دقیقه APK را از بخش Artifacts دانلود کن. ساخت کلید امضای رسمی هم با workflow «ساخت کلید امضا» انجام می‌شود — بدون نصب هیچ‌چیز روی کامپیوتر.
 
 ```bash
-npx cap add android
 npx cap sync
-npx cap open android   # در Android Studio: Run ▶ یا Build APK
+npx cap open android   # روش اختیاری کامپیوتری: در Android Studio: Run ▶ یا Build APK
 ```
 
-📖 **راهنمای کامل قدم‌به‌قدم (با تصویر، امضا و عیب‌یابی): [docs/APK-GUIDE.md](docs/APK-GUIDE.md)**
-
-نیازمندی: Android Studio روی کامپیوتر شما.
+📖 **راهنمای کامل قدم‌به‌قدم هر دو روش (گیت‌هاب بدون Android Studio / کامپیوتری، امضا و عیب‌یابی): [docs/APK-GUIDE.md](docs/APK-GUIDE.md)**
 
 ### مرحله ۴ — انتشار در کافه‌بازار / مایکت
 

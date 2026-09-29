@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">پلنر من</string>
+    <string name="title_activity_main">پلنر من</string>
+    <string name="package_name">ir.plannerman.app</string>
+    <string name="custom_url_scheme">ir.plannerman.app</string>
+</resources>
