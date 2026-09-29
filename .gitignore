@@ -69,3 +69,6 @@ Caddyfile
 /db/*.db
 /db/*.db-journal
 /db/uploads/
+
+# temporary downloadable source zip (served via /planner-man-source.zip)
+/public/planner-man-source.zip
