@@ -398,19 +398,19 @@ export default function AdminPanel({
                   <Field label="متن تبلیغ">
                     <Textarea value={adText} onChange={(e) => setAdText(e.target.value)} maxLength={500} rows={3} placeholder="توضیح کوتاه تبلیغ…" className="rounded-xl bg-background" />
                   </Field>
-                  <Field label="تصویر تبلیغ (اختیاری)" hint="مستقیم از گالری آپلود کن — JPG، PNG، WebP یا GIF، حداکثر ۲ مگابایت">
+                  <Field label="تصویر تبلیغ (اختیاری)" hint="هر نسبتی اوکیه — عکس تمام‌عرض و کامل نمایش داده می‌شود (بدون بریدگی). بهترین نتیجه: عکس افقی باکیفیت">
                     <span className="sr-only" id="ad-image-status">
                       {adImage ? "تصویر تبلیغ انتخاب شده است" : "تصویری انتخاب نشده است"}
                     </span>
                     {adImage ? (
-                      <div className="flex items-center gap-3 rounded-2xl border border-dashed border-amber-300/70 bg-amber-50/60 p-3 dark:border-amber-500/30 dark:bg-amber-500/5">
+                      <div className="rounded-2xl border border-dashed border-amber-300/70 bg-amber-50/60 p-3 dark:border-amber-500/30 dark:bg-amber-500/5">
                         <img
                           src={adImage}
                           alt="پیش‌نمایش تصویر تبلیغ"
-                          className="h-16 w-16 shrink-0 rounded-xl border border-border/60 object-cover shadow-sm sm:h-20 sm:w-20"
+                          className="h-24 w-full rounded-xl border border-border/60 object-cover shadow-sm sm:h-28"
                         />
-                        <div className="flex min-w-0 flex-1 flex-col gap-2">
-                          <p className="truncate text-[11px] font-bold text-muted-foreground" dir="ltr">
+                        <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                          <p className="min-w-0 truncate text-[11px] font-bold text-muted-foreground" dir="ltr">
                             {adImage.split("/").pop()}
                           </p>
                           <div className="flex flex-wrap gap-2">

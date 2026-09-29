@@ -515,3 +515,20 @@ Stage Summary:
 - 用户现在在管理面板直接从相册选图上传，无需任何外链；旧 http 链接值仍兼容显示
 - 技术要点：文件存 db/uploads + API 路由服务（而非 public/），保证 next dev 与生产 standalone 都能访问运行时上传的文件
 - 供后续 agent 注意：admin upload/upload-image 相关逻辑在 src/app/api/admin/upload、src/app/api/uploads/[name]，UI 在 admin-panel.tsx 的 «تصویر تبلیغ» Field
+
+---
+Task ID: 9
+Agent: Z.ai Code (main)
+Task: 重新设计广告横幅——图片全宽展示（用户反馈小缩略图不适合广告）
+
+Work Log:
+- 用户反馈：原设计图片只是 h-16/w-16 小方块缩略图，不适合广告展示；要求图片全宽 + 说明文字清晰可见
+- 重写 AdBanner 两种形态：
+  - 有图模式：白底卡片（bg-card+border 自适应主题）→ 顶部全宽图片区（h-48/sm:h-64）用「模糊背景 + object-contain」双层 img：任何比例的图都完整显示不裁剪，空隙用图片自身的模糊放大版优雅填充 → 标题 font-black + 说明 text-muted-foreground 在图片下方高对比展示 → 琥珀渐变 CTA 全宽按钮 → «تبلیغ» 半透明黑chip叠加在图片右上角（合规可见）
+  - 无图模式：保留原渐变文字横幅
+- 管理面板同步：预览改为宽幅 (h-24 w-full object-cover)，提示文字更新为「任何比例都行——全宽完整显示不裁剪」
+- 验证：方图 1024×1024（模拟用户海报）移动端+桌面端+夜间主题、宽图 1200×600 均完美；lint 通过；测试后清理（设置重置、删除测试图、恢复默认主题 شکوفه）
+
+Stage Summary:
+- 广告位从「小缩略图」升级为专业全宽媒体广告卡；图片永不裁剪（模糊填充），文字区对比度最大化，4 主题自适应
+- 关键实现：双层 <img>（底层 blur-lg scale-110 object-cover opacity-70 + 顶层 object-contain）

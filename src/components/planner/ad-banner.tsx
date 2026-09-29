@@ -14,6 +14,11 @@ import { useAppConfig, buildContactUrl } from "@/lib/app-config-context";
 
 // ─────────────────────────────────────────────
 //  بنر تبلیغ
+//  حالت ۱ (عکس‌دار): کارت روشن + عکس تمام‌عرض بالا با پس‌زمینه بلور —
+//                   کل عکس دیده می‌شود و هیچ‌وقت بریده نمی‌شود؛
+//                   عنوان/توضیح زیر عکس با بیشترین خوانایی؛
+//                   چیپ «تبلیغ» روی خود عکس (الزام شفافیت).
+//  حالت ۲ (بدون عکس): بنر گرادیانی متن‌محور.
 // ─────────────────────────────────────────────
 export function AdBanner() {
   const { config, isReady } = useAppConfig();
@@ -23,6 +28,59 @@ export function AdBanner() {
 
   const showImage = Boolean(config.adImage) && !imageBroken;
 
+  // ── حالت عکس‌دار ──
+  if (showImage) {
+    return (
+      <section className="anim-enter relative min-w-0 overflow-hidden rounded-3xl border border-border/60 bg-card shadow-xl shadow-amber-500/10">
+        <div className="relative h-48 w-full overflow-hidden bg-muted sm:h-64">
+          {/* پس‌زمینه بلور از خود عکس — هر نسبتی شیک پر می‌شود */}
+          <img
+            src={config.adImage ?? ""}
+            alt=""
+            aria-hidden
+            onError={() => setImageBroken(true)}
+            className="absolute inset-0 h-full w-full scale-110 object-cover opacity-70 blur-lg"
+          />
+          {/* خود عکس — کامل و بدون بریدگی */}
+          <img
+            src={config.adImage ?? ""}
+            alt="تصویر تبلیغ"
+            onError={() => setImageBroken(true)}
+            className="relative h-full w-full object-contain"
+          />
+          {/* چیپ شفافیت روی عکس */}
+          <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-black/55 px-2.5 py-1 text-[10px] font-bold text-white backdrop-blur">
+            <Megaphone className="h-3 w-3" />
+            تبلیغ
+          </span>
+        </div>
+
+        <div className="p-4 sm:p-5">
+          {config.adTitle && (
+            <h3 className="text-base font-black leading-snug sm:text-lg">{config.adTitle}</h3>
+          )}
+          {config.adText && (
+            <p className="mt-1.5 whitespace-pre-line text-xs font-medium leading-relaxed text-muted-foreground sm:text-sm">
+              {config.adText}
+            </p>
+          )}
+          {config.adLink && (
+            <a
+              href={config.adLink}
+              target="_blank"
+              rel="noopener noreferrer nofollow"
+              className="mt-3 inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-gradient-to-l from-amber-500 to-orange-500 px-5 py-2.5 text-sm font-black text-white shadow-lg shadow-orange-500/25 transition-transform hover:scale-[1.02] active:scale-[0.98] sm:w-auto"
+            >
+              {config.adButtonText || "مشاهده"}
+              <ExternalLink className="h-4 w-4" />
+            </a>
+          )}
+        </div>
+      </section>
+    );
+  }
+
+  // ── حالت بدون عکس ──
   return (
     <section className="anim-enter relative min-w-0 overflow-hidden rounded-3xl bg-gradient-to-bl from-amber-500 via-orange-500 to-rose-500 p-5 text-white shadow-xl shadow-amber-500/25 sm:p-6">
       <div aria-hidden className="pointer-events-none absolute -top-10 -left-10 h-36 w-36 rounded-full bg-white/15 blur-2xl" />
@@ -36,25 +94,15 @@ export function AdBanner() {
         <Megaphone className="h-6 w-6 shrink-0 text-white/90" strokeWidth={2.2} />
       </div>
 
-      <div className="relative mt-3 flex min-w-0 items-start gap-3">
-        {showImage && (
-          <img
-            src={config.adImage ?? ""}
-            alt="تصویر تبلیغ"
-            onError={() => setImageBroken(true)}
-            className="h-16 w-16 shrink-0 rounded-2xl border-2 border-white/40 object-cover shadow-md sm:h-20 sm:w-20"
-          />
+      <div className="relative mt-3 min-w-0">
+        {config.adTitle && (
+          <h3 className="text-base font-black leading-snug sm:text-lg">{config.adTitle}</h3>
         )}
-        <div className="min-w-0 flex-1">
-          {config.adTitle && (
-            <h3 className="text-base font-black leading-snug sm:text-lg">{config.adTitle}</h3>
-          )}
-          {config.adText && (
-            <p className="mt-1 whitespace-pre-line text-xs font-medium leading-relaxed text-white/90 sm:text-sm">
-              {config.adText}
-            </p>
-          )}
-        </div>
+        {config.adText && (
+          <p className="mt-1 whitespace-pre-line text-xs font-medium leading-relaxed text-white/90 sm:text-sm">
+            {config.adText}
+          </p>
+        )}
       </div>
 
       {config.adLink && (
