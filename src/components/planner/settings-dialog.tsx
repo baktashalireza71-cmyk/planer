@@ -31,6 +31,7 @@ import {
   Loader2,
   Lock,
   FileText,
+  Bell,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -42,9 +43,16 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { THEMES, type ThemeId } from "@/lib/themes";
 import { JALALI_MONTHS, faNum } from "@/lib/date";
 import { useAppConfig, buildContactUrl } from "@/lib/app-config-context";
+import { notifPrefsStore, defaultNotifPrefs, type NotifPrefs } from "@/lib/local-store";
+import {
+  requestNotificationPermission,
+  notificationPermission,
+  notificationsSupported,
+} from "@/lib/notifications";
 import { cn } from "@/lib/utils";
 import AdminPanel from "./admin-panel";
 
@@ -107,6 +115,7 @@ export default function SettingsDialog({
 
           <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-5 py-4">
             <ThemeSection />
+            <NotificationsSection />
             <BirthMonthSection />
             <SupportSection />
             <AdminSection />
@@ -180,7 +189,142 @@ function ThemeSection() {
 }
 
 // ─────────────────────────────────────────────
-//  ب) ماه تولد من (فال روزانه)
+//  ب) اعلان‌ها و یادآورها
+// ─────────────────────────────────────────────
+function NotificationsSection() {
+  const [prefs, setPrefs] = useState<NotifPrefs>(defaultNotifPrefs);
+  const [perm, setPerm] = useState<NotificationPermission | "unsupported">("default");
+  const [loaded, setLoaded] = useState(false);
+
+  // این بخش فقط هنگام باز شدن دیالوگ mount می‌شود — هر بار تازه خوانده می‌شود
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      await Promise.resolve(); // قطع مسیر همگام (سازگار با قواعد lint)
+      if (!alive) return;
+      setPrefs(notifPrefsStore.get());
+      setPerm(notificationPermission());
+      setLoaded(true);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
+  const update = (patch: Partial<NotifPrefs>) => {
+    const next = notifPrefsStore.set(patch);
+    setPrefs(next);
+  };
+
+  const askPermission = async () => {
+    const result = await requestNotificationPermission();
+    setPerm(result);
+    if (result === "granted") {
+      toast.success("اعلان‌ها فعال شد 🔔");
+    } else if (result === "denied") {
+      toast.error("اعلان مسدود شد — از تنظیمات مرورگر می‌توانی فعالش کنی");
+    }
+  };
+
+  return (
+    <section className="rounded-2xl border border-border/60 bg-card p-4">
+      <h4 className="mb-3 flex items-center gap-2 text-sm font-extrabold">
+        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-orange-100 text-orange-600 dark:bg-orange-500/20 dark:text-orange-400">
+          <Bell className="h-3.5 w-3.5" />
+        </span>
+        اعلان‌ها و یادآورها
+      </h4>
+
+      {!loaded ? (
+        <p className="flex items-center gap-2 py-1 text-xs text-muted-foreground">
+          <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          در حال بارگذاری تنظیمات…
+        </p>
+      ) : (
+        <div className="space-y-3">
+          {/* یادآور روزانه */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-extrabold">یادآور روزانه 🌙</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                هر شب در ساعت تعیین‌شده خلاصه کارها و عادت‌های امروزت را نشان می‌دهد.
+              </p>
+            </div>
+            <Switch
+              checked={prefs.dailyEnabled}
+              onCheckedChange={(v) => update({ dailyEnabled: v })}
+              aria-label="یادآور روزانه"
+            />
+          </div>
+          {prefs.dailyEnabled && (
+            <div className="flex items-center gap-2 pl-1">
+              <label htmlFor="daily-reminder-time" className="shrink-0 text-[11px] font-bold text-muted-foreground">
+                ساعت یادآور:
+              </label>
+              <Input
+                id="daily-reminder-time"
+                type="time"
+                dir="ltr"
+                value={prefs.dailyTime}
+                onChange={(e) => update({ dailyTime: e.target.value || "21:00" })}
+                className="h-9 w-32 rounded-xl bg-background text-center text-sm tabular-nums"
+              />
+            </div>
+          )}
+
+          {/* اعلان کارهای امروز */}
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <p className="text-xs font-extrabold">اعلان کارهای امروز 🔔</p>
+              <p className="mt-0.5 text-[11px] leading-relaxed text-muted-foreground">
+                وقتی برنامه را باز می‌کنی، کارهای امروز و عقب‌افتاده را یادآوری می‌کند.
+              </p>
+            </div>
+            <Switch
+              checked={prefs.dueAlertsEnabled}
+              onCheckedChange={(v) => update({ dueAlertsEnabled: v })}
+              aria-label="اعلان کارهای امروز"
+            />
+          </div>
+
+          {/* مجوز اعلان مرورگر */}
+          <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50/60 p-3 dark:border-orange-500/20 dark:bg-orange-500/5">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="min-w-0">
+                <p className="text-[11px] font-extrabold">اعلان سیستمی مرورگر</p>
+                <p className="mt-0.5 text-[10px] leading-relaxed text-muted-foreground">
+                  {perm === "granted"
+                    ? "فعال است ✅ — اعلان‌ها بیرون از برنامه هم نمایش داده می‌شوند."
+                    : perm === "denied"
+                      ? "مسدود شده — از تنظیمات مرورگر سایت را در فهرست مجازها بگذار."
+                      : "برای نمایش اعلان بیرون از برنامه، اجازه بده."}
+                </p>
+              </div>
+              {notificationsSupported() && perm === "default" ? (
+                <Button
+                  size="sm"
+                  onClick={askPermission}
+                  className="h-9 shrink-0 gap-1.5 rounded-full bg-gradient-to-l from-orange-500 to-pink-500 px-4 text-xs font-black text-white shadow-md hover:from-orange-600 hover:to-pink-600"
+                >
+                  <Bell className="h-3.5 w-3.5" />
+                  فعال‌سازی
+                </Button>
+              ) : !notificationsSupported() ? (
+                <span className="shrink-0 text-[10px] font-bold text-muted-foreground">پشتیبانی نمی‌شود</span>
+              ) : null}
+            </div>
+            <p className="mt-2 text-[10px] leading-relaxed text-orange-900/60 dark:text-orange-200/60">
+              یادآورها وقتی برنامه باز است نمایش داده می‌شوند؛ در نسخه اندروید (بازار) یادآور واقعی و دقیق فعال خواهد شد.
+            </p>
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─────────────────────────────────────────────
+//  ج) ماه تولد من (فال روزانه)
 // ─────────────────────────────────────────────
 function BirthMonthSection() {
   const [birthMonth, setBirthMonth] = useState<number | null>(null);

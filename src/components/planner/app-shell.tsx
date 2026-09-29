@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { motion } from "framer-motion";
 import {
   Home,
@@ -19,6 +19,9 @@ import {
 import { formatJalaliFull, formatClockFa, faNum, toJalali, JALALI_MONTHS } from "@/lib/date";
 import { useNow } from "@/hooks/use-clock";
 import { cn } from "@/lib/utils";
+import { migrateFromServerOnce } from "@/lib/local-store";
+import { useNotificationScheduler } from "@/lib/notifications";
+import NotificationCenter from "./notification-center";
 import Dashboard from "./dashboard";
 import FalSection from "./fal-section";
 import SettingsDialog from "./settings-dialog";
@@ -63,6 +66,12 @@ export const NAV_ITEMS: {
 export default function AppShell() {
   const [tab, setTab] = useState<TabKey>("dashboard");
   const [settingsOpen, setSettingsOpen] = useState(false);
+
+  // مهاجرت یک‌بارهٔ داده‌های نسخه قبلی (سرور) به حافظه دستگاه + زمان‌بند اعلان‌ها
+  useEffect(() => {
+    migrateFromServerOnce();
+  }, []);
+  useNotificationScheduler();
 
   // hydration-safe mounted flag
   const mounted = useSyncExternalStore(
@@ -130,11 +139,14 @@ export default function AppShell() {
             })}
           </nav>
 
-          {/* دکمه تنظیمات دسکتاپ */}
+          {/* دکمه اعلان‌ها + تنظیمات دسکتاپ */}
+          <div className="mt-3">
+            <NotificationCenter variant="sidebar" onNavigate={setTab} />
+          </div>
           <button
             onClick={() => setSettingsOpen(true)}
             aria-label="تنظیمات"
-            className="mt-3 flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-foreground/75 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
+            className="flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-foreground/75 transition-colors hover:bg-accent hover:text-accent-foreground cursor-pointer"
           >
             <Settings className="h-5 w-5 shrink-0" strokeWidth={2.2} />
             تنظیمات
@@ -178,7 +190,8 @@ export default function AppShell() {
                 <Clock className="h-3.5 w-3.5" />
                 <span className="tabular-nums">{liveNow ? formatClockFa(liveNow) : "۰۰:۰۰"}</span>
               </div>
-              {/* دکمه تنظیمات — لمسی ۴۴px */}
+              {/* دکمه اعلان‌ها + تنظیمات — لمسی ۴۴px */}
+              <NotificationCenter variant="icon" onNavigate={setTab} />
               <button
                 onClick={() => setSettingsOpen(true)}
                 aria-label="تنظیمات"
